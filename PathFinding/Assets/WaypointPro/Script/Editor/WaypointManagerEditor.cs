@@ -275,6 +275,9 @@ public class WaypointManagerEditor : Editor
 
         sceneMode = (SceneMode)GUILayout.SelectionGrid((int)sceneMode, System.Enum.GetNames(typeof(SceneMode)), 1);
 
+        if (GUILayout.Button("Add - Immediate"))
+            AddImmediateWaypoint();
+
         if (GUILayout.Button("Del"))
             DeleteWaypoint();
 
@@ -504,6 +507,35 @@ public class WaypointManagerEditor : Editor
         script.selected.firstHandles.Add(Vector3.left);
         script.selected.secondHandles.Add(Vector3.right);
         SetLinePoints();
+    }
+	
+	void AddImmediateWaypoint()
+    {
+        Vector3 position = Vector3.zero;;
+
+        const float distanceOffset = 5;
+
+        if (script.selected.points == null || script.selected.points.Count == 0)
+        {
+            position = Vector3.zero;
+        }
+        else if ( script.selected.points.Count == 1 )
+        {
+            position += Vector3.right * distanceOffset;
+        }
+        else 
+        {
+            position = script.selected.points[script.selected.points.Count - 1];
+            Vector3 dir = ( script.selected.points[script.selected.points.Count - 1] - script.selected.points[script.selected.points.Count - 2] ).normalized;
+            position += dir * distanceOffset;
+        }
+
+        script.selected.points.Add(position);
+
+        script.selected.firstHandles.Add(Vector3.left);
+        script.selected.secondHandles.Add(Vector3.right);
+        SetLinePoints();
+        //ReIndexPoints();
     }
 
     void DeleteWaypoint(int removeIndex = -1)
