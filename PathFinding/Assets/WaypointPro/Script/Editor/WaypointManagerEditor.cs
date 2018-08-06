@@ -330,40 +330,40 @@ public class WaypointManagerEditor : Editor
             Handles.color = Color.magenta;
             wayPoints[i] = Handles.FreeMoveHandle(wayPoints[i], Quaternion.identity, script.selected.pointSize, Vector3.zero, Handles.SphereCap);
 
-            if (script.selected.lineType == PathLineType.BezierCurve)
-            {
-                Vector3 firstControlPoint = wayPoints[i] + script.selected.firstHandles[i];
-                Vector3 secondControlPoint = wayPoints[i] + script.selected.secondHandles[i];
+            // if (script.selected.lineType == PathLineType.BezierCurve)
+            // {
+            //     Vector3 firstControlPoint = wayPoints[i] + script.selected.firstHandles[i];
+            //     Vector3 secondControlPoint = wayPoints[i] + script.selected.secondHandles[i];
 
-                Handles.color = Color.gray;
-                if (i != 0)
-                {
-                    Vector3 movedPoint = Handles.FreeMoveHandle(firstControlPoint, Quaternion.identity, script.selected.pointSize, Vector3.zero, Handles.SphereCap);
-                    if (firstControlPoint != movedPoint)
-                    {
-                        firstControlPoint = movedPoint - wayPoints[i];
+            //     Handles.color = Color.gray;
+            //     if (i != 0)
+            //     {
+            //         Vector3 movedPoint = Handles.FreeMoveHandle(firstControlPoint, Quaternion.identity, script.selected.pointSize, Vector3.zero, Handles.SphereCap);
+            //         if (firstControlPoint != movedPoint)
+            //         {
+            //             firstControlPoint = movedPoint - wayPoints[i];
 
-                        Quaternion qRot = Quaternion.FromToRotation(script.selected.firstHandles[i], firstControlPoint);
-                        script.selected.secondHandles[i] = qRot * script.selected.secondHandles[i];
-                        script.selected.firstHandles[i] = firstControlPoint;
-                    }
-                    Handles.DrawLine(wayPoints[i], firstControlPoint);
-                }
-                if (i != wayPoints.Count - 1)
-                {
-                    Vector3 movedPoint = Handles.FreeMoveHandle(secondControlPoint, Quaternion.identity, script.selected.pointSize, Vector3.zero, Handles.SphereCap);
-                    if (secondControlPoint != movedPoint)
-                    {
-                        secondControlPoint = movedPoint - wayPoints[i];
+            //             Quaternion qRot = Quaternion.FromToRotation(script.selected.firstHandles[i], firstControlPoint);
+            //             script.selected.secondHandles[i] = qRot * script.selected.secondHandles[i];
+            //             script.selected.firstHandles[i] = firstControlPoint;
+            //         }
+            //         Handles.DrawLine(wayPoints[i], firstControlPoint);
+            //     }
+            //     if (i != wayPoints.Count - 1)
+            //     {
+            //         Vector3 movedPoint = Handles.FreeMoveHandle(secondControlPoint, Quaternion.identity, script.selected.pointSize, Vector3.zero, Handles.SphereCap);
+            //         if (secondControlPoint != movedPoint)
+            //         {
+            //             secondControlPoint = movedPoint - wayPoints[i];
 
-                        Quaternion qRot = Quaternion.FromToRotation(script.selected.secondHandles[i], secondControlPoint);
-                        script.selected.firstHandles[i] = qRot * script.selected.firstHandles[i];
-                        script.selected.secondHandles[i] = secondControlPoint;
-                    }
-                    Handles.DrawLine(wayPoints[i], secondControlPoint);
-                }
-                Handles.color = Color.white;
-            }
+            //             Quaternion qRot = Quaternion.FromToRotation(script.selected.secondHandles[i], secondControlPoint);
+            //             script.selected.firstHandles[i] = qRot * script.selected.firstHandles[i];
+            //             script.selected.secondHandles[i] = secondControlPoint;
+            //         }
+            //         Handles.DrawLine(wayPoints[i], secondControlPoint);
+            //     }
+            //     Handles.color = Color.white;
+            // }
         }
         Handles.color = Color.white;
     }
@@ -499,8 +499,8 @@ public class WaypointManagerEditor : Editor
         else
             script.selected.points.Insert(addIndex, position);
 
-        script.selected.firstHandles.Add(Vector3.left);
-        script.selected.secondHandles.Add(Vector3.right);
+        // script.selected.firstHandles.Add(Vector3.left);
+        // script.selected.secondHandles.Add(Vector3.right);
         SetLinePoints();
     }
 	
@@ -527,8 +527,8 @@ public class WaypointManagerEditor : Editor
 
         script.selected.points.Add(position);
 
-        script.selected.firstHandles.Add(Vector3.left);
-        script.selected.secondHandles.Add(Vector3.right);
+        // script.selected.firstHandles.Add(Vector3.left);
+        // script.selected.secondHandles.Add(Vector3.right);
         SetLinePoints();
         //ReIndexPoints();
     }
@@ -541,16 +541,16 @@ public class WaypointManagerEditor : Editor
 
         if (removeIndex == -1) removeIndex = wayPointList.Count - 1;
         wayPointList.RemoveAt(removeIndex);
-        script.selected.firstHandles.RemoveAt(removeIndex);
-        script.selected.secondHandles.RemoveAt(removeIndex);
+        // script.selected.firstHandles.RemoveAt(removeIndex);
+        // script.selected.secondHandles.RemoveAt(removeIndex);
         SetLinePoints();
     }
 
     void ClearWaypoint()
     {
         script.selected.points.Clear();
-        script.selected.firstHandles.Clear();
-        script.selected.secondHandles.Clear();
+        // script.selected.firstHandles.Clear();
+        // script.selected.secondHandles.Clear();
         SetLinePoints();
     }
 
