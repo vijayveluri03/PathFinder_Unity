@@ -11,9 +11,9 @@ namespace Mr1
 
         void OnMouseUp()
         {
-            var targetPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            targetPos.z = transform.position.z;
-            target.FollowPathToPoint(pathName, targetPos, 10f);
+            // var targetPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            // targetPos.z = transform.position.z;
+            // target.FollowPathToPoint(pathName, targetPos, 10f);
         }
     }
 }

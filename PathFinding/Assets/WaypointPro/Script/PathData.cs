@@ -23,17 +23,17 @@ namespace Mr1
         [SerializeField] public List<Vector3> points;
         [SerializeField] public List<Vector3> firstHandles; 
         [SerializeField] public List<Vector3> secondHandles;
-        [SerializeField] public List<Vector3> linePoints;
+        //[SerializeField] public List<Vector3> linePoints;
 
-        public Vector3 startPoint { get { return linePoints[0]; } }
-        public Vector3 endPoint { get { return linePoints[linePoints.Count-1]; } }
+        // public Vector3 startPoint { get { return linePoints[0]; } }
+        // public Vector3 endPoint { get { return linePoints[linePoints.Count-1]; } }
 
         public PathData()
         {
             points = new List<Vector3>();
             firstHandles = new List<Vector3>();
             secondHandles = new List<Vector3>();
-            linePoints = new List<Vector3>();
+            //linePoints = new List<Vector3>();
         }
 
         

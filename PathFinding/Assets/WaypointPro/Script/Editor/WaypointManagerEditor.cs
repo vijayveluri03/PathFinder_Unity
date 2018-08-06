@@ -310,7 +310,7 @@ public class WaypointManagerEditor : Editor
 
     void DrawPathLine()
     {
-        List<Vector3> linePoints = script.selected.linePoints;
+        List<Vector3> linePoints = script.selected.points;
         if (linePoints == null) return;
 
         Handles.color = script.selected.lineColor;
@@ -376,11 +376,6 @@ public class WaypointManagerEditor : Editor
     {
         if (script.selected == null) return;
 
-        if (script.selected.linePoints == null)
-            script.selected.linePoints = new List<Vector3>();
-        else
-            script.selected.linePoints.Clear();
-
         switch (script.selected.lineType)
         {
             case PathLineType.Straight: SetStraightLine(); break;
@@ -393,50 +388,50 @@ public class WaypointManagerEditor : Editor
 
     void SetStraightLine()
     {
-        List<Vector3> wayPoints = script.selected.points;
-        if (wayPoints.Count < 2)
-            return;
+        // List<Vector3> wayPoints = script.selected.points;
+        // if (wayPoints.Count < 2)
+        //     return;
 
-        for (int i = 0; i < wayPoints.Count-1; i++)
-        {
-            for (float t = 0f; t <= 1.0f; t += 0.05f)
-            {
-                Vector3 pt = wayPoints[i] * (1f - t) + wayPoints[i + 1] * t;
-                script.selected.linePoints.Add(pt);
-            }
-        }
+        // for (int i = 0; i < wayPoints.Count-1; i++)
+        // {
+        //     for (float t = 0f; t <= 1.0f; t += 0.05f)
+        //     {
+        //         Vector3 pt = wayPoints[i] * (1f - t) + wayPoints[i + 1] * t;
+        //         script.selected.linePoints.Add(pt);
+        //     }
+        // }
 
-        script.selected.linePoints.Add(wayPoints[wayPoints.Count - 1]);
+        // script.selected.linePoints.Add(wayPoints[wayPoints.Count - 1]);
     }
 
     void SetCatmullRomCurveLine()
     {
-        List<Vector3> wayPoints = script.selected.points;
+        // List<Vector3> wayPoints = script.selected.points;
 
-        if (wayPoints.Count < 3)
-            return;
+        // if (wayPoints.Count < 3)
+        //     return;
 
-        Vector3[] catmullRomPoints = new Vector3[wayPoints.Count + 2];
-        wayPoints.CopyTo(catmullRomPoints, 1);
+        // Vector3[] catmullRomPoints = new Vector3[wayPoints.Count + 2];
+        // wayPoints.CopyTo(catmullRomPoints, 1);
 
-        int endIndex = catmullRomPoints.Length - 1;
+        // int endIndex = catmullRomPoints.Length - 1;
 
-        catmullRomPoints[0] = catmullRomPoints[1] + (catmullRomPoints[1] - catmullRomPoints[2]) + (catmullRomPoints[3] - catmullRomPoints[2]);
-        catmullRomPoints[endIndex] = catmullRomPoints[endIndex - 1] + (catmullRomPoints[endIndex - 1] - catmullRomPoints[endIndex - 2])
-                                + (catmullRomPoints[endIndex - 3] - catmullRomPoints[endIndex - 2]);
+        // catmullRomPoints[0] = catmullRomPoints[1] + (catmullRomPoints[1] - catmullRomPoints[2]) + (catmullRomPoints[3] - catmullRomPoints[2]);
+        // catmullRomPoints[endIndex] = catmullRomPoints[endIndex - 1] + (catmullRomPoints[endIndex - 1] - catmullRomPoints[endIndex - 2])
+        //                         + (catmullRomPoints[endIndex - 3] - catmullRomPoints[endIndex - 2]);
 
-        script.selected.linePoints.Add(wayPoints[0]);
+        // script.selected.linePoints.Add(wayPoints[0]);
 
-        for (int i = 0; i < catmullRomPoints.Length - 3; i++)
-        {
-            for (float t = 0.05f; t <= 1.0f; t += 0.05f)
-            {
-                Vector3 pt = ComputeCatmullRom(catmullRomPoints[i], catmullRomPoints[i + 1], catmullRomPoints[i + 2], catmullRomPoints[i + 3], t);
-                script.selected.linePoints.Add(pt);
-            }
-        }
+        // for (int i = 0; i < catmullRomPoints.Length - 3; i++)
+        // {
+        //     for (float t = 0.05f; t <= 1.0f; t += 0.05f)
+        //     {
+        //         Vector3 pt = ComputeCatmullRom(catmullRomPoints[i], catmullRomPoints[i + 1], catmullRomPoints[i + 2], catmullRomPoints[i + 3], t);
+        //         script.selected.linePoints.Add(pt);
+        //     }
+        // }
 
-        script.selected.linePoints.Add(wayPoints[wayPoints.Count - 1]);
+        // script.selected.linePoints.Add(wayPoints[wayPoints.Count - 1]);
     }
 
     Vector3 ComputeCatmullRom(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float t)
@@ -454,31 +449,31 @@ public class WaypointManagerEditor : Editor
 
     void SetBezierCurveLine()
     {
-        List<Vector3> wayPoints = script.selected.points;
-        List<Vector3> firstControls = script.selected.firstHandles;
-        List<Vector3> secondControls = script.selected.secondHandles;
+        // List<Vector3> wayPoints = script.selected.points;
+        // List<Vector3> firstControls = script.selected.firstHandles;
+        // List<Vector3> secondControls = script.selected.secondHandles;
 
-        if (wayPoints.Count < 2)
-            return;
+        // if (wayPoints.Count < 2)
+        //     return;
 
-        script.selected.linePoints.Add(wayPoints[0]);
+        // script.selected.linePoints.Add(wayPoints[0]);
 
-        for (int i = 0; i < wayPoints.Count - 1; i++)
-        {
-            Vector3 waypoint1 = wayPoints[i];
-            Vector3 waypoint2 = wayPoints[i + 1];
-            Vector3 controlPoint1 = wayPoints[i] + secondControls[i];
-            Vector3 controlPoint2 = wayPoints[i + 1] + firstControls[i + 1];
+        // for (int i = 0; i < wayPoints.Count - 1; i++)
+        // {
+        //     Vector3 waypoint1 = wayPoints[i];
+        //     Vector3 waypoint2 = wayPoints[i + 1];
+        //     Vector3 controlPoint1 = wayPoints[i] + secondControls[i];
+        //     Vector3 controlPoint2 = wayPoints[i + 1] + firstControls[i + 1];
 
-            for (float t = 0.05f; t <= 1.0f; t += 0.05f)
-            {
-                Vector3 pt = ComputeBezier(waypoint1, controlPoint1, controlPoint2, waypoint2, t);
+        //     for (float t = 0.05f; t <= 1.0f; t += 0.05f)
+        //     {
+        //         Vector3 pt = ComputeBezier(waypoint1, controlPoint1, controlPoint2, waypoint2, t);
 
-                script.selected.linePoints.Add(pt);
-            }
-        }
+        //         script.selected.linePoints.Add(pt);
+        //     }
+        // }
 
-        script.selected.linePoints.Add(wayPoints[wayPoints.Count-1]);
+        // script.selected.linePoints.Add(wayPoints[wayPoints.Count-1]);
     }
 
     Vector3 ComputeBezier(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float t)
