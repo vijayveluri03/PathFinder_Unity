@@ -122,14 +122,14 @@ public class WaypointManagerEditor : Editor
                 script.selected.lineColor = EditorGUILayout.ColorField("Path Color", script.selected.lineColor);
                 script.selected.lineType = (PathLineType)EditorGUILayout.EnumPopup("Path Type", script.selected.lineType);
 
-                List<Vector3> wayPointList = script.selected.points;
+                List<WayPoint> wayPointList = script.selected.points;
 
                 if (wayPointList.Count > 0)
                 {
                     GUILayout.BeginHorizontal();
                     {
-                        float fDepth = EditorGUILayout.FloatField("Path Depth", wayPointList[0].z);
-                        if (wayPointList[0].z != fDepth) SetWaypointDepth(fDepth);
+                        float fDepth = EditorGUILayout.FloatField("Path Depth", wayPointList[0].position.z);
+                        if (wayPointList[0].position.z != fDepth) SetWaypointDepth(fDepth);
                 
                         if (GUILayout.Button("Depth +"))
                             SetWaypointDepth(fDepth + 1);
@@ -144,9 +144,9 @@ public class WaypointManagerEditor : Editor
                 {
                     GUILayout.BeginHorizontal();
                     {
-                        wayPointList[j] = EditorGUILayout.Vector3Field("Point " + count++, wayPointList[j]);
+                        wayPointList[j].position = EditorGUILayout.Vector3Field("Point " + count++, wayPointList[j].position);
                         if (GUILayout.Button("+", GUILayout.Width(25f)))
-                            AddWaypoint(wayPointList[j] + Vector3.right + Vector3.up, j + 1);
+                            AddWaypoint(wayPointList[j].position + Vector3.right + Vector3.up, j + 1);
                         if (GUILayout.Button("-", GUILayout.Width(25f)))
                             DeleteWaypoint(j);
                     }
@@ -303,32 +303,32 @@ public class WaypointManagerEditor : Editor
         Handles.color = Color.green;
         foreach (var point in script.selected.points)
         {
-            Handles.SphereCap(0, point, Quaternion.identity, script.selected.pointSize);
+            Handles.SphereCap(0, point.position, Quaternion.identity, script.selected.pointSize);
         }
         Handles.color = Color.white;
     }
 
     void DrawPathLine()
     {
-        List<Vector3> linePoints = script.selected.points;
+        List<WayPoint> linePoints = script.selected.points;
         if (linePoints == null) return;
 
         Handles.color = script.selected.lineColor;
         for (int i = 1; i < linePoints.Count; i++)
         {
-            Handles.DrawLine(linePoints[i - 1], linePoints[i]);
+            Handles.DrawLine(linePoints[i - 1].position, linePoints[i].position);
         }
         Handles.color = Color.white;
     }
 
     void DrawHandlePoint()
     {
-        List<Vector3> wayPoints = script.selected.points;
+        List<WayPoint> wayPoints = script.selected.points;
 
         for (int i = 0; i < wayPoints.Count; i++)
         {
             Handles.color = Color.magenta;
-            wayPoints[i] = Handles.FreeMoveHandle(wayPoints[i], Quaternion.identity, script.selected.pointSize, Vector3.zero, Handles.SphereCap);
+            wayPoints[i].position = Handles.FreeMoveHandle(wayPoints[i].position, Quaternion.identity, script.selected.pointSize, Vector3.zero, Handles.SphereCap);
 
             // if (script.selected.lineType == PathLineType.BezierCurve)
             // {
@@ -492,12 +492,12 @@ public class WaypointManagerEditor : Editor
 
     void AddWaypoint(Vector3 position, int addIndex = -1)
     {
-        position.z = (script.selected.points.Count > 0) ? script.selected.points[0].z : 0f;
+        position.z = (script.selected.points.Count > 0) ? script.selected.points[0].position.z : 0f;
 
         if (addIndex == -1)
-            script.selected.points.Add(position);
+            script.selected.points.Add( new WayPoint( position ));
         else
-            script.selected.points.Insert(addIndex, position);
+            script.selected.points.Insert(addIndex, new WayPoint( position ));
 
         // script.selected.firstHandles.Add(Vector3.left);
         // script.selected.secondHandles.Add(Vector3.right);
@@ -520,12 +520,12 @@ public class WaypointManagerEditor : Editor
         }
         else 
         {
-            position = script.selected.points[script.selected.points.Count - 1];
-            Vector3 dir = ( script.selected.points[script.selected.points.Count - 1] - script.selected.points[script.selected.points.Count - 2] ).normalized;
+            position = script.selected.points[script.selected.points.Count - 1].position;
+            Vector3 dir = ( script.selected.points[script.selected.points.Count - 1].position - script.selected.points[script.selected.points.Count - 2].position ).normalized;
             position += dir * distanceOffset;
         }
 
-        script.selected.points.Add(position);
+        script.selected.points.Add( new WayPoint( position ));
 
         // script.selected.firstHandles.Add(Vector3.left);
         // script.selected.secondHandles.Add(Vector3.right);
@@ -535,7 +535,7 @@ public class WaypointManagerEditor : Editor
 
     void DeleteWaypoint(int removeIndex = -1)
     {
-        List<Vector3> wayPointList = script.selected.points;
+        List<WayPoint> wayPointList = script.selected.points;
         if (wayPointList == null || wayPointList.Count == 0)
             return;
 
@@ -556,9 +556,9 @@ public class WaypointManagerEditor : Editor
 
     void SetWaypointDepth(float fDepth)
     {
-        List<Vector3> wayPointList = script.selected.points;
+        List<WayPoint> wayPointList = script.selected.points;
         for (int i = 0; i < wayPointList.Count; i++)
-            wayPointList[i] = new Vector3(wayPointList[i].x, wayPointList[i].y, fDepth);
+            wayPointList[i].position = new Vector3(wayPointList[i].position.x, wayPointList[i].position.y, fDepth);
 
         SetLinePoints();
     }
