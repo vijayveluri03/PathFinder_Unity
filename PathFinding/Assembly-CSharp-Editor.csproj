@@ -53,11 +53,11 @@
   <ItemGroup>
      <Compile Include="Assets\WaypointPro\Script\Editor\CustomEditor.cs" />
      <Compile Include="Assets\WaypointPro\Script\Editor\WaypointManagerEditor.cs" />
- <Reference Include="Unity.PackageManagerUI.Editor">
- <HintPath>/Users/vijay.veluri/Git/PathFinding-WayPoint/PathFinding/Library/ScriptAssemblies/Unity.PackageManagerUI.Editor.dll</HintPath>
- </Reference>
  <Reference Include="UnityEditor.StandardEvents">
  <HintPath>/Users/vijay.veluri/Git/PathFinding-WayPoint/PathFinding/Library/ScriptAssemblies/UnityEditor.StandardEvents.dll</HintPath>
+ </Reference>
+ <Reference Include="Unity.PackageManagerUI.Editor">
+ <HintPath>/Users/vijay.veluri/Git/PathFinding-WayPoint/PathFinding/Library/ScriptAssemblies/Unity.PackageManagerUI.Editor.dll</HintPath>
  </Reference>
  <Reference Include="UnityEngine.AIModule">
  <HintPath>/Applications/Unity-all/2018/Unity.app/Contents/Managed/UnityEngine/UnityEngine.AIModule.dll</HintPath>
