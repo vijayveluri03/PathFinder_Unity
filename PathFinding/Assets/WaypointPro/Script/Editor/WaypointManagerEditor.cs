@@ -22,7 +22,7 @@ public class WaypointManagerEditor : Editor
     const string CostTextcolor = "#0000ffff";
 
 
-    #region Menu Method
+#region Instantiation and Asset management 
 
     [MenuItem("GameObject/Create Waypoint Manager")]
     public static void CreateWaypointManager()
@@ -39,7 +39,54 @@ public class WaypointManagerEditor : Editor
             Debug.LogError("Waypoint Manager already exists!");
     }
 
-    #endregion
+    PathData CreatePathAsset()
+    {
+        string strAssetPath = EditorUtility.SaveFilePanelInProject("New Path", "NewPath", "asset", "");
+        
+        if (string.IsNullOrEmpty(strAssetPath))
+            return null; 
+
+        strAssetPath = AssetDatabase.GenerateUniqueAssetPath(strAssetPath);
+
+        int startIndex = strAssetPath.LastIndexOf("/") + 1;
+        int length = strAssetPath.LastIndexOf(".") - startIndex;
+        string strAssetName = strAssetPath.Substring(startIndex, length);
+
+        PathData newPath = ScriptableObject.CreateInstance<PathData>();
+        newPath.pathName = strAssetName;
+
+        AssetDatabase.CreateAsset(newPath, strAssetPath);
+        AssetDatabase.SaveAssets();
+
+        return newPath;
+    }
+
+    PathData LoadPathAsset()
+    {
+        string strAssetPath = EditorUtility.OpenFilePanel("Load Path", "Assets/", "asset");
+        strAssetPath = strAssetPath.Substring(strAssetPath.IndexOf("Assets/"));
+
+        if (string.IsNullOrEmpty(strAssetPath))
+            return null;
+        
+        PathData loadedPath = (PathData)AssetDatabase.LoadAssetAtPath(strAssetPath, typeof(PathData));
+
+        int startIndex = strAssetPath.LastIndexOf("/") + 1;
+        int length = strAssetPath.LastIndexOf(".") - startIndex;
+        string strAssetName = strAssetPath.Substring(startIndex, length);
+
+        loadedPath.pathName = strAssetName;
+
+        return loadedPath;
+    }
+    
+    void SavePathAsset()
+    {
+        AssetDatabase.SaveAssets();
+        
+        foreach (var path in script.pathList)
+            EditorUtility.SetDirty(path);
+    }
 
     void OnEnable()
     {
@@ -52,7 +99,7 @@ public class WaypointManagerEditor : Editor
             if (script.pathList[i] == null) script.pathList.RemoveAt(i);
         }
 
-        script.selected = null;
+        //script.selected = null;
         foreach(var path in script.pathList)
         {
             if (path != null)
@@ -63,20 +110,22 @@ public class WaypointManagerEditor : Editor
                 path.pathName = strAssetPath.Substring(startIndex, length);
             }
         }
+
+        if ( script.selected != null ) 
+            script.selected.Refresh();
     }
 
-     void OnDisable()
+    void OnDisable()
     {
-        AssetDatabase.SaveAssets();
-        if (script != null)
-        {
-            EditorUtility.SetDirty(script);
-            foreach (var path in script.pathList)
-            {
-                if (path != null) EditorUtility.SetDirty(path);
-            }
-        }
+       
     }
+
+
+#endregion
+
+
+    
+#region OnInspectorGUI's Display Method
 
     public override void OnInspectorGUI()
     {
@@ -86,8 +135,6 @@ public class WaypointManagerEditor : Editor
 
         ShowPointsAndPathInInspector();
     }
-
-    #region OnInspectorGUI's Display Method
 
     void RenderButtons()
     {
@@ -179,59 +226,9 @@ public class WaypointManagerEditor : Editor
         }
     }
 
-    #endregion
+#endregion
 
-    #region Path Asset Method
-
-    PathData CreatePathAsset()
-    {
-        string strAssetPath = EditorUtility.SaveFilePanelInProject("New Path", "NewPath", "asset", "");
-        
-        if (string.IsNullOrEmpty(strAssetPath))
-            return null;
-
-        strAssetPath = AssetDatabase.GenerateUniqueAssetPath(strAssetPath);
-
-        int startIndex = strAssetPath.LastIndexOf("/") + 1;
-        int length = strAssetPath.LastIndexOf(".") - startIndex;
-        string strAssetName = strAssetPath.Substring(startIndex, length);
-
-        PathData newPath = ScriptableObject.CreateInstance<PathData>();
-        newPath.pathName = strAssetName;
-
-        AssetDatabase.CreateAsset(newPath, strAssetPath);
-        AssetDatabase.SaveAssets();
-
-        return newPath;
-    }
-
-    PathData LoadPathAsset()
-    {
-        string strAssetPath = EditorUtility.OpenFilePanel("Load Path", "Assets/", "asset");
-        strAssetPath = strAssetPath.Substring(strAssetPath.IndexOf("Assets/"));
-
-        if (string.IsNullOrEmpty(strAssetPath))
-            return null;
-        
-        PathData loadedPath = (PathData)AssetDatabase.LoadAssetAtPath(strAssetPath, typeof(PathData));
-
-        int startIndex = strAssetPath.LastIndexOf("/") + 1;
-        int length = strAssetPath.LastIndexOf(".") - startIndex;
-        string strAssetName = strAssetPath.Substring(startIndex, length);
-
-        loadedPath.pathName = strAssetName;
-
-        return loadedPath;
-    }
-    
-    void SavePathAsset()
-    {
-        AssetDatabase.SaveAssets();
-        foreach (var path in script.pathList)
-            EditorUtility.SetDirty(path);
-    }
-
-    #endregion
+#region Scene Rendering Display Method
 
     void OnSceneGUI()
     {
@@ -241,10 +238,10 @@ public class WaypointManagerEditor : Editor
         if (script.selected != null)
         {
             DrawWindow();
+            UpdateMouseInput();
 
             if (sceneMode == SceneMode.Add)
             {
-                UpdateMouseInput();
                 DrawWaypointInAddMode();
             }
             else if (sceneMode == SceneMode.Edit)
@@ -258,7 +255,7 @@ public class WaypointManagerEditor : Editor
         CheckGUIChanged();
     }
 
-     void CheckGUIChanged()
+    void CheckGUIChanged()
     {
         if (GUI.changed)
         {
@@ -267,37 +264,6 @@ public class WaypointManagerEditor : Editor
             SceneView.RepaintAll();
         }
     }
-
-
-    #region Input Method
-
-    void UpdateMouseInput()
-    {
-        Event e = Event.current;
-        if (e.type == EventType.MouseDown)
-        {
-            if (e.button == 0)
-                OnMouseClick(e.mousePosition);
-        }
-    }
-
-    void OnMouseClick(Vector2 mousePos)
-    {
-        LayerMask backgroundLayerMask = 1 << script.gameObject.layer;
-
-        Ray ray = HandleUtility.GUIPointToWorldRay(mousePos);
-        RaycastHit hit;
-        if (Physics.Raycast(ray, out hit, 1000f, backgroundLayerMask))
-        {
-            Vector3 hitPos = hit.point;
-            AddWaypoint(hitPos);
-        }
-    }
-
-    #endregion
-
-    #region OnSceneGUI's Draw Method
-
     void DrawWindow()
     {
         GUILayout.Window(1, new Rect(0f, 25f, 70f, 80f), DoWaypointWindow, script.selected.pathName);
@@ -322,10 +288,34 @@ public class WaypointManagerEditor : Editor
         }
 
 		if (GUILayout.Button("Refresh"))
-			AutoGenerateStuff();
+        {
+            if ( script.selected != null ) 
+                script.selected.Refresh();   
+        }
 
         if (GUILayout.Button("Do something "))
-			DoSomething();
+		{
+            string str = "";
+            foreach ( var a in script.FindShortedPath( 1, 8 ) ) 
+            {
+                str += "=>" + a.autoGeneratedID.ToString();
+            }
+            Debug.LogWarning("Path:" + str);
+            // {
+            //     float startTime = Time.realtimeSinceStartup;
+            //     Debug.Log("Hello: " + Time.realtimeSinceStartup );
+            //     script.FindShortestPathAsynchronous( 1, 8, delegate ( List<WayPoint> wayPoints ) 
+            //     { 
+            //         string str = "";
+            //         foreach ( var a in wayPoints ) 
+            //         {
+            //             str += "=>" + a.autoGeneratedID.ToString();
+            //         }
+            //         Debug.LogWarning("Path: " + str);
+            //         Debug.Log("Time Taken:" + (Time.realtimeSinceStartup - startTime));
+            //     } );
+            // }
+        }
 
         GUI.color = Color.green;
         script.selected.lineType = (PathLineType)EditorGUILayout.EnumPopup(script.selected.lineType);
@@ -390,7 +380,7 @@ public class WaypointManagerEditor : Editor
                     if ( showCostsInTheScene )
                     {
                         if ( !string.IsNullOrEmpty( str ) )
-                            str += "<Color=" + "#ffffff" + ">" + "  |  " + "</Color>";
+                            str += "<Color=" + "#ffffff" + ">" + "  Cost: " + "</Color>";
 
                         str += "<Color=" + CostTextcolor + ">" + paths[i].cost.ToString()  + "</Color>";
                     }
@@ -481,71 +471,48 @@ public class WaypointManagerEditor : Editor
 
         Handles.color = Color.white;
     }
+#endregion
 
-    #endregion
+#region Input Method
 
-    #region Line Points Setting Method
-
-    void AutoGenerateStuff ( )
+    void UpdateMouseInput()
     {
-        if ( script.selected == null || script.selected.points == null )
+        Event e = Event.current;
+        if (e.type == EventType.MouseDown)
+        {
+            if (e.button == 0)
+                OnMouseClick(e.mousePosition);
+        }
+        else if ( e.type == EventType.MouseUp )
+        {
+            EditorUtility.SetDirty(script);
+        }
+            
+    }
+
+    void OnMouseClick(Vector2 mousePos)
+    {
+        if( sceneMode != SceneMode.Add ) 
             return;
 
-        //Generate IDs for way points
+        LayerMask backgroundLayerMask = 1 << script.gameObject.layer;
+
+        Ray ray = HandleUtility.GUIPointToWorldRay(mousePos);
+        RaycastHit hit;
+        if (Physics.Raycast(ray, out hit, 1000f, backgroundLayerMask))
         {
-            int maxID = 0;
-            
-            for ( int i = 0; i < script.selected.points.Count; i++  )
-            {
-                if ( script.selected.points[i].autoGeneratedID > maxID ) 
-                    maxID = script.selected.points[i].autoGeneratedID;
-            }
-
-            maxID = maxID + 1;
-
-            for ( int i = 0; i < script.selected.points.Count; i++  )
-            {
-                if ( script.selected.points[i].autoGeneratedID <= 0  ) 
-                    script.selected.points[i].autoGeneratedID = maxID++;
-            }
-        }
-
-        // generate IDs for way paths.
-        {
-            int maxID = 0;
-            for ( int i = 0; i < script.selected.paths.Count; i++  )
-            {
-                if ( script.selected.paths[i].autoGeneratedID > maxID ) 
-                    maxID = script.selected.paths[i].autoGeneratedID;
-            }
-
-            maxID = maxID + 1;
-
-            for ( int i = 0; i < script.selected.paths.Count; i++  )
-            {
-                if ( script.selected.paths[i].autoGeneratedID <= 0  ) 
-                    script.selected.paths[i].autoGeneratedID = maxID++;
-            }
-        }
-
-        // refreshing dictionaries
-        {
-            script.selected.pathsSorted.Clear();
-            script.selected.pointsSorted.Clear();
-
-            for ( int i = 0; i < script.selected.points.Count; i++  )
-            {
-                script.selected.pointsSorted[ script.selected.points[i].autoGeneratedID ] = script.selected.points[i] ;
-            }
-
-            for ( int i = 0; i < script.selected.paths.Count; i++  )
-            {
-                script.selected.pathsSorted[ script.selected.paths[i].autoGeneratedID ] = script.selected.paths[i] ;
-            }
+            Vector3 hitPos = hit.point;
+            AddWaypoint(hitPos);
         }
     }
+
+#endregion
+
+    
+    
  
 
+#region Line Points Setting Method
     void SetStraightLine()
     {
         // List<Vector3> wayPoints = script.selected.points;
@@ -646,9 +613,9 @@ public class WaypointManagerEditor : Editor
         return p0 * _t3 + 3f * p1 * t * _t2 + 3 * p2 * t2 * (1 - t) + p3 * t3;
     }
 
-    #endregion
+#endregion
 
-    #region Waypoint Method
+#region Waypoint and WayPath Method
 
     void AddWaypoint(Vector3 position, int addIndex = -1)
     {
@@ -657,7 +624,8 @@ public class WaypointManagerEditor : Editor
         else
             script.selected.points.Insert(addIndex, new WayPoint( position ));
 
-        AutoGenerateStuff();
+        if ( script.selected != null ) 
+            script.selected.Refresh();
     }
 	
 	void AddImmediateWaypoint()
@@ -683,7 +651,8 @@ public class WaypointManagerEditor : Editor
 
         script.selected.points.Add( new WayPoint( position ));
 
-        AutoGenerateStuff();
+        if ( script.selected != null ) 
+            script.selected.Refresh();
     }
 
     void DeleteWaypoint(int removeIndex = -1)
@@ -694,7 +663,9 @@ public class WaypointManagerEditor : Editor
 
         if (removeIndex == -1) removeIndex = wayPointList.Count - 1;
         wayPointList.RemoveAt(removeIndex);
-        AutoGenerateStuff();
+        
+        if ( script.selected != null ) 
+            script.selected.Refresh();
     }
 
     void ClearWaypoint()
@@ -711,7 +682,8 @@ public class WaypointManagerEditor : Editor
 
         // script.selected.firstHandles.Add(Vector3.left);
         // script.selected.secondHandles.Add(Vector3.right);
-        AutoGenerateStuff();
+        if ( script.selected != null ) 
+            script.selected.Refresh();
     }
 
     void DeleteWayPath(int removeIndex = -1)
@@ -724,7 +696,8 @@ public class WaypointManagerEditor : Editor
         wayPathList.RemoveAt(removeIndex);
         // script.selected.firstHandles.RemoveAt(removeIndex);
         // script.selected.secondHandles.RemoveAt(removeIndex);
-        AutoGenerateStuff();
+        if ( script.selected != null ) 
+            script.selected.Refresh();
     }
 
     void ClearWayPath()
@@ -735,110 +708,13 @@ public class WaypointManagerEditor : Editor
     }
 
 
-    #endregion
+#endregion
 
+#region Path finding 
 
+   
 
-    void DoSomething()
-    {
-        int startPointID = 1; 
-        int endPointID = 8;
-		bool found = false;
-
-        AutoGenerateStuff();
-
-        WayPoint startPoint = script.selected.pointsSorted[startPointID];
-        WayPoint endPoint = script.selected.pointsSorted[endPointID];
-
-        foreach( var point in script.selected.points )
-        {
-            point.HeuristicDistance = -1;
-            point.previousWayPoint = null;
-        }
-
-        List<WayPoint> completedPoints = new List<WayPoint>();
-        List<WayPoint> NextPoints = new List<WayPoint>();
-
-        startPoint.pathDistance = 0;
-		startPoint.HeuristicDistance = Vector3.Distance ( startPoint.position, endPoint.position );
-        NextPoints.Add( startPoint );
-
-        while ( true )
-        {
-            WayPoint leastCostPoint = null; 
-            
-            float minCost = 99999;
-            foreach ( var point in NextPoints )
-            {
-                if ( point.HeuristicDistance <= 0 )
-                    point.HeuristicDistance = Vector3.Distance ( point.position, endPoint.position );
-
-                if ( minCost > point.combinedHeuristic )
-                {
-                    leastCostPoint = point;
-                    minCost = point.combinedHeuristic;
-                }
-            }
-
-			if ( leastCostPoint == null ) 
-				break;
-			
-            if ( leastCostPoint == endPoint )
-            {
-				found = true;
-				WayPoint prevPoint = leastCostPoint;
-				string str = "";
-				while ( prevPoint != null ) 
-				{
-					str += "=>" + prevPoint.autoGeneratedID.ToString();
-					prevPoint = prevPoint.previousWayPoint;
-				}
-
-				Debug.LogWarning("Path:" + str);
-                break;
-            }
-
-            foreach ( var path in script.selected.paths )
-            {
-                if ( path.IDOfA == leastCostPoint.autoGeneratedID 
-                || path.IDOfB == leastCostPoint.autoGeneratedID )
-                {
-                    WayPoint otherPoint = path.IDOfA == leastCostPoint.autoGeneratedID ? 
-                                            script.selected.pointsSorted[path.IDOfB] : script.selected.pointsSorted[path.IDOfA];
-
-                    if ( otherPoint.HeuristicDistance <= 0 )
-                        otherPoint.HeuristicDistance = Vector3.Distance ( otherPoint.position, endPoint.position );
-
-                    if ( completedPoints.Contains ( otherPoint) )
-                        continue;
-
-                    if ( NextPoints.Contains( otherPoint ))
-                    {
-                        if ( otherPoint.pathDistance > 
-                            ( leastCostPoint.pathDistance + path.cost ) )
-                        {
-                            otherPoint.pathDistance = leastCostPoint.pathDistance + path.cost; 
-                            otherPoint.previousWayPoint = leastCostPoint;
-                        }
-                    }
-                    else
-                    {
-                        otherPoint.pathDistance = leastCostPoint.pathDistance + path.cost; 
-                        otherPoint.previousWayPoint = leastCostPoint;
-                        NextPoints.Add ( otherPoint );
-                    }
-                }
-            }
-
-			NextPoints.Remove ( leastCostPoint );
-			completedPoints.Add ( leastCostPoint );
-        }       
-
-		if ( !found ) 
-		{
-			Debug.LogError("No path found");
-		}
-    }
+#endregion
 
     private bool showPointIDsInTheScene = true;
     private bool showPathIDsInTheScene = true;

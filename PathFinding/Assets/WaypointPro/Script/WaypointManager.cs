@@ -21,60 +21,240 @@ namespace Mr1
             for (int i = 0; i < pathList.Count; ++i) _pathDic.Add(pathList[i].pathName, pathList[i]);
         }
 
+		public void SelectPath ( int pathIndex ) 
+		{
+			if ( pathList != null && pathList.Count > pathIndex )
+			{
+				selected = pathList[pathIndex];
+				selected.Refresh();
+			}
+		}
+
         public PathData GetPathData(string pathName)
         {
             if (_pathDic.ContainsKey(pathName)) return _pathDic[pathName];
             return null;
         }
-    }
-}
 
-public static class WaypointProExtensions
-{
-    // public static PathFollower FollowPath(this Transform transform, string pathName, float moveSpeed,
-    //                                 FollowType followType = FollowType.Once, FollowDirection followDirection = FollowDirection.Forward)
-    // {
-    //     PathData pathData = WaypointManager.instance.GetPathData(pathName);
-    //     var pathFollower = PathFollower.Create(transform);
-    //     if (pathData != null) pathFollower.Follow(pathData, moveSpeed, followType, followDirection);
-    //     else Debug.LogError(string.Format("[WaypointManager] couldn't find path('{0}')", pathName));
-    //     return pathFollower;
-    // }
-    // public static PathFollower FollowPathToPoint(this Transform transform, string pathName, Vector2 targetPos, float moveSpeed)
-    // {
-    //     PathData pathData = WaypointManager.instance.GetPathData(pathName);
-    //     var pathFollower = PathFollower.Create(transform);
-    //     if (pathData != null) pathFollower.FollowToPoint(pathData, moveSpeed, targetPos);
-    //     else Debug.LogError(string.Format("[WaypointManager] couldn't find path('{0}')", pathName));
-    //     return pathFollower;
-    // }
-    // public static void StopFollowing(this Transform transform)
-    // {
-    //     PathFollower.Stop(transform);
-    // }
-    // public static PathFollower Duration(this PathFollower pathFollower, float duration)
-    // {
-    //     Cooltimer.Set(pathFollower, duration, () => pathFollower.StopFollowing());
-    //     return pathFollower;
-    // }
-    // public static PathFollower Flip(this PathFollower pathFollower, bool useFlip)
-    // {
-    //     pathFollower.SetFlip(useFlip);
-    //     return pathFollower;
-    // }
-    // public static PathFollower LookForward(this PathFollower pathFollower, bool useLookForward)
-    // {
-    //     pathFollower.SetLookForward(useLookForward);
-    //     return pathFollower;
-    // }
-    // public static PathFollower SmoothLookForward(this PathFollower pathFollower, bool useSmoothLookForward, float rotateSpeed)
-    // {
-    //     pathFollower.SetSmoothLookForward(useSmoothLookForward, rotateSpeed);
-    //     return pathFollower;
-    // }
-    // public static PathFollower Log(this PathFollower pathFollower, bool logMessage)
-    // {
-    //     pathFollower.logMessage = logMessage;
-    //     return pathFollower;
-    // }
+        public void FindShortestPathAsynchronous ( int fromNodeID, int toNodeId, System.Action<List<WayPoint>> callback )
+        {
+            StartCoroutine( FindShortestPathAsynchonousInternal( fromNodeID, toNodeId, callback ) );
+        }
+
+        public List<WayPoint> FindShortedPath( int fromNodeID, int toNodeID )
+        {
+            int startPointID = fromNodeID; 
+            int endPointID = toNodeID;
+            bool found = false;
+
+            selected.Refresh();
+
+            WayPoint startPoint = selected.pointsSorted[startPointID];
+            WayPoint endPoint = selected.pointsSorted[endPointID];
+
+            foreach( var point in selected.points )
+            {
+                point.HeuristicDistance = -1;
+                point.previousWayPoint = null;
+            }
+
+            List<WayPoint> completedPoints = new List<WayPoint>();
+            List<WayPoint> nextPoints = new List<WayPoint>();
+            List<WayPoint> finalPath = new List<WayPoint>();
+
+            startPoint.pathDistance = 0;
+            startPoint.HeuristicDistance = Vector3.Distance ( startPoint.position, endPoint.position );
+            nextPoints.Add( startPoint );
+
+            while ( true )
+            {
+                WayPoint leastCostPoint = null; 
+                
+                float minCost = 99999;
+                foreach ( var point in nextPoints )
+                {
+                    if ( point.HeuristicDistance <= 0 )
+                        point.HeuristicDistance = Vector3.Distance ( point.position, endPoint.position );
+
+                    if ( minCost > point.combinedHeuristic )
+                    {
+                        leastCostPoint = point;
+                        minCost = point.combinedHeuristic;
+                    }
+                }
+
+                if ( leastCostPoint == null ) 
+                    break;
+                
+                if ( leastCostPoint == endPoint )
+                {
+                    found = true;
+                    WayPoint prevPoint = leastCostPoint;
+                    while ( prevPoint != null ) 
+                    {
+                        finalPath.Insert(0, prevPoint);
+                        prevPoint = prevPoint.previousWayPoint;
+                    }
+
+                    return finalPath;
+                }
+    
+                foreach ( var path in selected.paths )
+                {
+                    if ( path.IDOfA == leastCostPoint.autoGeneratedID 
+                    || path.IDOfB == leastCostPoint.autoGeneratedID )
+                    {
+                        WayPoint otherPoint = path.IDOfA == leastCostPoint.autoGeneratedID ? 
+                                                selected.pointsSorted[path.IDOfB] : selected.pointsSorted[path.IDOfA];
+
+                        if ( otherPoint.HeuristicDistance <= 0 )
+                            otherPoint.HeuristicDistance = Vector3.Distance ( otherPoint.position, endPoint.position );
+
+                        if ( completedPoints.Contains ( otherPoint) )
+                            continue;
+
+                        if ( nextPoints.Contains( otherPoint ))
+                        {
+                            if ( otherPoint.pathDistance > 
+                                ( leastCostPoint.pathDistance + path.cost ) )
+                            {
+                                otherPoint.pathDistance = leastCostPoint.pathDistance + path.cost; 
+                                otherPoint.previousWayPoint = leastCostPoint;
+                            }
+                        }
+                        else
+                        {
+                            otherPoint.pathDistance = leastCostPoint.pathDistance + path.cost; 
+                            otherPoint.previousWayPoint = leastCostPoint;
+                            nextPoints.Add ( otherPoint );
+                        }
+                    }
+                }
+
+                nextPoints.Remove ( leastCostPoint );
+                completedPoints.Add ( leastCostPoint );
+            }       
+
+            if ( !found ) 
+            {
+                return null;
+            }
+            Debug.LogError("Shouldnt be here");
+            return null;
+        }
+
+
+        IEnumerator FindShortestPathAsynchonousInternal ( int fromNodeID, int toNodeID, System.Action<List<WayPoint>> callback )
+        {
+            if ( callback == null )
+                yield break;
+
+            int startPointID = fromNodeID; 
+            int endPointID = toNodeID;
+            bool found = false;
+
+            selected.Refresh();
+
+            WayPoint startPoint = selected.pointsSorted[startPointID];
+            WayPoint endPoint = selected.pointsSorted[endPointID];
+
+            foreach( var point in selected.points )
+            {
+                point.HeuristicDistance = -1;
+                point.previousWayPoint = null;
+            }
+
+            List<WayPoint> completedPoints = new List<WayPoint>();
+            List<WayPoint> nextPoints = new List<WayPoint>();
+            List<WayPoint> finalPath = new List<WayPoint>();
+
+            startPoint.pathDistance = 0;
+            startPoint.HeuristicDistance = Vector3.Distance ( startPoint.position, endPoint.position );
+            nextPoints.Add( startPoint );
+
+            while ( true )
+            {
+                WayPoint leastCostPoint = null; 
+                
+                float minCost = 99999;
+                foreach ( var point in nextPoints )
+                {
+                    if ( point.HeuristicDistance <= 0 )
+                        point.HeuristicDistance = Vector3.Distance ( point.position, endPoint.position );
+
+                    if ( minCost > point.combinedHeuristic )
+                    {
+                        leastCostPoint = point;
+                        minCost = point.combinedHeuristic;
+                    }
+                }
+
+                if ( leastCostPoint == null ) 
+                    break;
+                
+                if ( leastCostPoint == endPoint )
+                {
+                    found = true;
+                    WayPoint prevPoint = leastCostPoint;
+                    while ( prevPoint != null ) 
+                    {
+                        finalPath.Insert(0, prevPoint);
+                        prevPoint = prevPoint.previousWayPoint;
+                    }
+
+                    callback ( finalPath );
+                    yield break;
+                }
+    
+                foreach ( var path in selected.paths )
+                {
+                    if ( path.IDOfA == leastCostPoint.autoGeneratedID 
+                    || path.IDOfB == leastCostPoint.autoGeneratedID )
+                    {
+                        WayPoint otherPoint = path.IDOfA == leastCostPoint.autoGeneratedID ? 
+                                                selected.pointsSorted[path.IDOfB] : selected.pointsSorted[path.IDOfA];
+
+                        if ( otherPoint.HeuristicDistance <= 0 )
+                            otherPoint.HeuristicDistance = Vector3.Distance ( otherPoint.position, endPoint.position );
+
+                        if ( completedPoints.Contains ( otherPoint) )
+                            continue;
+
+                        if ( nextPoints.Contains( otherPoint ))
+                        {
+                            if ( otherPoint.pathDistance > 
+                                ( leastCostPoint.pathDistance + path.cost ) )
+                            {
+                                otherPoint.pathDistance = leastCostPoint.pathDistance + path.cost; 
+                                otherPoint.previousWayPoint = leastCostPoint;
+                            }
+                        }
+                        else
+                        {
+                            otherPoint.pathDistance = leastCostPoint.pathDistance + path.cost; 
+                            otherPoint.previousWayPoint = leastCostPoint;
+                            nextPoints.Add ( otherPoint );
+                        }
+                    }
+                }
+
+                nextPoints.Remove ( leastCostPoint );
+                completedPoints.Add ( leastCostPoint );
+
+                yield return null;
+            }       
+
+            if ( !found ) 
+            {
+                callback ( null );
+                yield break;
+            }
+            
+            Debug.LogError("Shouldnt be here");
+            callback ( null );
+            yield break;
+        }
+
+
+    }
 }
