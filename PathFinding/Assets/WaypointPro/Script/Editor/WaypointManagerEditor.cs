@@ -13,6 +13,7 @@ public class WaypointManagerEditor : Editor
     {
         Add,
         Edit,
+        None
     }
 
     SceneMode sceneMode;
@@ -242,12 +243,14 @@ public class WaypointManagerEditor : Editor
 
             if (sceneMode == SceneMode.Add)
             {
-                DrawWaypointInAddMode();
+                DrawWaypoints( Color.green );
             }
             else if (sceneMode == SceneMode.Edit)
             {
-                DrawHandlePointInEditMode();
+                DrawWaypoints ( Color.magenta, true );
             }
+            else 
+                DrawWaypoints ( Color.gray );
 
             DrawPathLine();
         }
@@ -324,12 +327,15 @@ public class WaypointManagerEditor : Editor
         EditorGUILayout.EndVertical();
     }
 
-    void DrawWaypointInAddMode()
+    void DrawWaypoints( Color color, bool canMove = false  )
     {
-        Handles.color = Color.green;
+        Handles.color = color;
         foreach (var point in script.selected.points)
         {
-            Handles.SphereCap(0, point.position, Quaternion.identity, script.selected.pointSize);
+            if ( canMove ) 
+                point.position = Handles.FreeMoveHandle(point.position, Quaternion.identity, script.selected.pointSize, Vector3.zero, Handles.SphereCap);
+            else
+                Handles.SphereCap(0, point.position, Quaternion.identity, script.selected.pointSize);
         }
         Handles.color = Color.white;
 
@@ -338,6 +344,60 @@ public class WaypointManagerEditor : Editor
 
         Handles.color = Color.white;
     }
+
+
+    // void DrawHandlePointInEditMode( )
+    // {
+    //     List<WayPoint> wayPoints = script.selected.points;
+
+    //     for (int i = 0; i < wayPoints.Count; i++)
+    //     {
+    //         Handles.color = Color.magenta;
+    //         wayPoints[i].position = Handles.FreeMoveHandle(wayPoints[i].position, Quaternion.identity, script.selected.pointSize, Vector3.zero, Handles.SphereCap);
+
+    //         // if (script.selected.lineType == PathLineType.BezierCurve)
+    //         // {
+    //         //     Vector3 firstControlPoint = wayPoints[i] + script.selected.firstHandles[i];
+    //         //     Vector3 secondControlPoint = wayPoints[i] + script.selected.secondHandles[i];
+
+    //         //     Handles.color = Color.gray;
+    //         //     if (i != 0)
+    //         //     {
+    //         //         Vector3 movedPoint = Handles.FreeMoveHandle(firstControlPoint, Quaternion.identity, script.selected.pointSize, Vector3.zero, Handles.SphereCap);
+    //         //         if (firstControlPoint != movedPoint)
+    //         //         {
+    //         //             firstControlPoint = movedPoint - wayPoints[i];
+
+    //         //             Quaternion qRot = Quaternion.FromToRotation(script.selected.firstHandles[i], firstControlPoint);
+    //         //             script.selected.secondHandles[i] = qRot * script.selected.secondHandles[i];
+    //         //             script.selected.firstHandles[i] = firstControlPoint;
+    //         //         }
+    //         //         Handles.DrawLine(wayPoints[i], firstControlPoint);
+    //         //     }
+    //         //     if (i != wayPoints.Count - 1)
+    //         //     {
+    //         //         Vector3 movedPoint = Handles.FreeMoveHandle(secondControlPoint, Quaternion.identity, script.selected.pointSize, Vector3.zero, Handles.SphereCap);
+    //         //         if (secondControlPoint != movedPoint)
+    //         //         {
+    //         //             secondControlPoint = movedPoint - wayPoints[i];
+
+    //         //             Quaternion qRot = Quaternion.FromToRotation(script.selected.secondHandles[i], secondControlPoint);
+    //         //             script.selected.firstHandles[i] = qRot * script.selected.firstHandles[i];
+    //         //             script.selected.secondHandles[i] = secondControlPoint;
+    //         //         }
+    //         //         Handles.DrawLine(wayPoints[i], secondControlPoint);
+    //         //     }
+    //         //     Handles.color = Color.white;
+    //         // }
+    //     }
+
+    //     Handles.color = Color.white;
+
+    //     // GUI display about the way points in the scene view
+    //     DrawGUIDisplayForPoints();
+
+    //     Handles.color = Color.white;
+    // }
 
     void DrawPathLine()
     {
@@ -418,59 +478,6 @@ public class WaypointManagerEditor : Editor
         Handles.EndGUI();
     }
 
-    void DrawHandlePointInEditMode()
-    {
-        List<WayPoint> wayPoints = script.selected.points;
-
-        for (int i = 0; i < wayPoints.Count; i++)
-        {
-            Handles.color = Color.magenta;
-            wayPoints[i].position = Handles.FreeMoveHandle(wayPoints[i].position, Quaternion.identity, script.selected.pointSize, Vector3.zero, Handles.SphereCap);
-
-            // if (script.selected.lineType == PathLineType.BezierCurve)
-            // {
-            //     Vector3 firstControlPoint = wayPoints[i] + script.selected.firstHandles[i];
-            //     Vector3 secondControlPoint = wayPoints[i] + script.selected.secondHandles[i];
-
-            //     Handles.color = Color.gray;
-            //     if (i != 0)
-            //     {
-            //         Vector3 movedPoint = Handles.FreeMoveHandle(firstControlPoint, Quaternion.identity, script.selected.pointSize, Vector3.zero, Handles.SphereCap);
-            //         if (firstControlPoint != movedPoint)
-            //         {
-            //             firstControlPoint = movedPoint - wayPoints[i];
-
-            //             Quaternion qRot = Quaternion.FromToRotation(script.selected.firstHandles[i], firstControlPoint);
-            //             script.selected.secondHandles[i] = qRot * script.selected.secondHandles[i];
-            //             script.selected.firstHandles[i] = firstControlPoint;
-            //         }
-            //         Handles.DrawLine(wayPoints[i], firstControlPoint);
-            //     }
-            //     if (i != wayPoints.Count - 1)
-            //     {
-            //         Vector3 movedPoint = Handles.FreeMoveHandle(secondControlPoint, Quaternion.identity, script.selected.pointSize, Vector3.zero, Handles.SphereCap);
-            //         if (secondControlPoint != movedPoint)
-            //         {
-            //             secondControlPoint = movedPoint - wayPoints[i];
-
-            //             Quaternion qRot = Quaternion.FromToRotation(script.selected.secondHandles[i], secondControlPoint);
-            //             script.selected.firstHandles[i] = qRot * script.selected.firstHandles[i];
-            //             script.selected.secondHandles[i] = secondControlPoint;
-            //         }
-            //         Handles.DrawLine(wayPoints[i], secondControlPoint);
-            //     }
-            //     Handles.color = Color.white;
-            // }
-        }
-
-        Handles.color = Color.white;
-
-        // GUI display about the way points in the scene view
-        Handles.BeginGUI();
-        DrawGUIDisplayForPoints();
-
-        Handles.color = Color.white;
-    }
 #endregion
 
 #region Input Method

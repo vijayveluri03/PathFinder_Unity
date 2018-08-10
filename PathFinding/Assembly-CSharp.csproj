@@ -52,6 +52,8 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\WaypointPro\Sample\Script\MouseClickDemo.cs" />
+     <Compile Include="Assets\WaypointPro\Sample\Script\PathFollower.cs" />
+     <Compile Include="Assets\WaypointPro\Sample\Script\PathFollowerYSnap.cs" />
      <Compile Include="Assets\WaypointPro\Sample\Script\PlayerDemo.cs" />
      <Compile Include="Assets\WaypointPro\Script\Cooltimer.cs" />
      <Compile Include="Assets\WaypointPro\Script\PathData.cs" />
