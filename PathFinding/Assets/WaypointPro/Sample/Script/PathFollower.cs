@@ -5,59 +5,14 @@ using UnityEngine;
 
 namespace Mr1
 {
-    public static class PathFinderUtility 
+    public enum PathLineType
     {
-            public static PathFollower FollowPath( Transform transform, List<Vector3> points, float moveSpeed )
-            {
-                var pathFollower = Create(transform);
-                if (points != null) pathFollower.Follow(points, moveSpeed);
-                else Debug.LogError(string.Format("[WaypointManager] couldn't find path"));
-                return pathFollower;
-            }
-            public static PathFollower FollowPathWithGroundSnap( Transform transform, List<Vector3> points, float moveSpeed, Vector3 directionOfRayCast, 
-                                                                    float offsetDistanceFromPoint, float offsetDistanceToFloatFromGround, int maxDistanceForRayCast, int groundLayer )
-            {
-                var pathFollower = CreateWithSnapToGround(transform, directionOfRayCast, offsetDistanceFromPoint, offsetDistanceToFloatFromGround, maxDistanceForRayCast, groundLayer );
-                if (points != null) pathFollower.Follow(points, moveSpeed);
-                else Debug.LogError(string.Format("[WaypointManager] couldn't find path"));
-                return pathFollower;
-            }
-            public static void StopFollowing( Transform transform)
-            {
-                Stop(transform);
-            }
-
-            private static PathFollower Create(Transform transform)
-            {
-                var pathFollower = transform.GetComponent<PathFollower>();
-                if (pathFollower == null) pathFollower = transform.gameObject.AddComponent<PathFollower>();
-                pathFollower._transform = transform;
-                return pathFollower;
-            }
-
-            private static PathFollower CreateWithSnapToGround(Transform transform, Vector3 directionOfRayCast, float offsetDistanceFromPoint, float offsetDistanceToFloatFromGround, int maxDistanceForRayCast, int groundLayer)
-            {
-                var pathFollower = transform.GetComponent<PathFollowerYSnap>();
-                if (pathFollower == null) pathFollower = transform.gameObject.AddComponent<PathFollowerYSnap>();
-
-                pathFollower.Init( directionOfRayCast, offsetDistanceFromPoint, offsetDistanceToFloatFromGround, maxDistanceForRayCast, groundLayer);
-
-                pathFollower._transform = transform;
-                return pathFollower;
-            }
-
-            private static void Stop(Transform transform)
-            {
-                var pathFollower = transform.GetComponent<PathFollower>();
-                if (pathFollower != null) { pathFollower.StopFollowing(); GameObject.Destroy(pathFollower); }
-            }
+        Straight,
+        CatmullRomCurve,
     }
 
     public class PathFollower : MonoBehaviour
     {
-        
-
-
         public bool logMessage;
 		protected List<Vector3> pointsToFollow;
 
@@ -147,6 +102,16 @@ namespace Mr1
       
             return nextIndex;
         }
+
+
+
+
+
+
+
+
+
+
 
     }
 }

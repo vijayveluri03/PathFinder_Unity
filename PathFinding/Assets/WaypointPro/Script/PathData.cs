@@ -6,12 +6,6 @@ using System.Collections.Generic;
 
 namespace Mr1
 {
-    public enum PathLineType
-    {
-        Straight,
-        CatmullRomCurve,
-        BezierCurve,
-    }
 
     [System.Serializable]
     public class WayPoint 
