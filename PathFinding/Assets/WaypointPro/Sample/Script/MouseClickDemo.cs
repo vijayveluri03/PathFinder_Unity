@@ -47,7 +47,7 @@ namespace Mr1
                     { 
                        PathFinderUtility.FollowPathWithGroundSnap ( playerObj.transform, wayPoints, playerSpeed, Vector3.down, 5, 0.1f, 200, LayerMask.NameToLayer("Default"));
                     },
-                    WaypointManager.instance.pathData.lineType,
+                    WaypointManager.instance.graphData.lineType,
                     false
                  );
             }

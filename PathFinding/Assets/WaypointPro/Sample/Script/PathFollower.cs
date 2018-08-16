@@ -5,12 +5,7 @@ using UnityEngine;
 
 namespace Mr1
 {
-    public enum PathLineType
-    {
-        Straight,
-        CatmullRomCurve,
-    }
-
+   
     public class PathFollower : MonoBehaviour
     {
         public bool logMessage;

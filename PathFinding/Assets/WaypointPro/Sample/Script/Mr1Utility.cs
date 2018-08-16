@@ -4,26 +4,16 @@ using UnityEngine;
 
 namespace Mr1
 {
-	public static class Utility
-	{
-		public static GUIStyle GetStyleWithRichText ( GUIStyle style = null )
-		{
-			style = style != null ? style : new GUIStyle();
-			style.richText = true;
-			return style;
-		}
-	}
-
     public static class PathFinderUtility 
     {
 		/* PUBLIC */
 
 		public static void CreatePath (  this WaypointManager manager, Vector3 startPoint, Vector3 endPoint, System.Action<List<Vector3>> OnPathFound, PathLineType pathType,  bool useStraightPathFromStartAndEnd = false )
 		{
-			int nearestPointFromStart = manager.FindNearestWayPoint ( startPoint );
+			int nearestPointFromStart = manager.FindNearestNode ( startPoint );
 			int nearestPointFromEnd = -1;
 			if ( nearestPointFromStart != -1 )
-				nearestPointFromEnd = manager.FindNearestWayPoint ( endPoint );
+				nearestPointFromEnd = manager.FindNearestNode ( endPoint );
 
 
 			if ( nearestPointFromEnd == -1 || nearestPointFromStart == -1 )
@@ -36,7 +26,7 @@ namespace Mr1
 			float startTime = Time.realtimeSinceStartup;
             
 			manager.FindShortestPathAsynchronous( nearestPointFromStart, nearestPointFromEnd, 
-				delegate ( List<WayPoint> wayPoints ) 
+				delegate ( List<Node> wayPoints ) 
                 { 
 					if ( wayPoints == null || wayPoints.Count == 0 )
 						OnPathFound ( null );
@@ -75,12 +65,12 @@ namespace Mr1
 		}
 
 
-		public static int FindNearestWayPoint ( this WaypointManager manager, Vector3 point )
+		public static int FindNearestNode ( this WaypointManager manager, Vector3 point )
 		{
 			float minDistance = float.MaxValue;
-			WayPoint nearestWayPoint = null;
+			Node nearestWayPoint = null;
 
-			foreach ( var wayPoint in manager.pathData.points )
+			foreach ( var wayPoint in manager.graphData.nodes )
 			{
 				if ( Vector3.Distance ( wayPoint.position, point ) < minDistance ) 
 				{
@@ -222,3 +212,4 @@ namespace Mr1
     }
 
 }
+

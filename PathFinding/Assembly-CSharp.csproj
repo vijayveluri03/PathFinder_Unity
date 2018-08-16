@@ -52,10 +52,9 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\WaypointPro\Sample\Script\MouseClickDemo.cs" />
+     <Compile Include="Assets\WaypointPro\Sample\Script\Mr1Utility.cs" />
      <Compile Include="Assets\WaypointPro\Sample\Script\PathFollower.cs" />
      <Compile Include="Assets\WaypointPro\Sample\Script\PathFollowerYSnap.cs" />
-     <Compile Include="Assets\WaypointPro\Sample\Script\PlayerDemo.cs" />
-     <Compile Include="Assets\WaypointPro\Script\Mr1Utility.cs" />
      <Compile Include="Assets\WaypointPro\Script\PathData.cs" />
      <Compile Include="Assets\WaypointPro\Script\WaypointManager.cs" />
  <Reference Include="UnityEditor.StandardEvents">
