@@ -9,6 +9,7 @@ namespace Mr1
         public Transform target;
         public string pathName;
         public Camera camera;
+        public float playerSpeed = 20.0f;
 
         public GameObject playerObj;
 
@@ -39,15 +40,14 @@ namespace Mr1
             }
 
 
-			WaypointManager.instance.SelectPath ( 0 );
             //WaypointManager.instance.selected.Refresh();
             {
                 WaypointManager.instance.CreatePath( playerObj.transform.position, hitPos,  
                     delegate ( List<Vector3> wayPoints ) 
                     { 
-                       PathFinderUtility.FollowPathWithGroundSnap ( playerObj.transform, wayPoints, 20.0f, Vector3.down, 5, 0.1f, 200, LayerMask.NameToLayer("Default"));
+                       PathFinderUtility.FollowPathWithGroundSnap ( playerObj.transform, wayPoints, playerSpeed, Vector3.down, 5, 0.1f, 200, LayerMask.NameToLayer("Default"));
                     },
-                    PathLineType.CatmullRomCurve,
+                    WaypointManager.instance.pathData.lineType,
                     false
                  );
             }

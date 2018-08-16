@@ -1,0 +1,34 @@
+﻿<Properties StartupItem="Assembly-CSharp.csproj">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/WaypointPro/Sample/Script/MouseClickDemo.cs">
+    <Files>
+      <File FileName="Assets/WaypointPro/Sample/Script/PathFollowerYSnap.cs" Line="24" Column="52" />
+      <File FileName="Assets/WaypointPro/Sample/Script/PathFollower.cs" Line="17" Column="52" />
+      <File FileName="Assets/WaypointPro/Sample/Script/MouseClickDemo.cs" Line="45" Column="88" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="PathFinding" expanded="True">
+            <Node name="Assembly-CSharp" expanded="True" />
+          </Node>
+        </State>
+      </Pad>
+      <Pad Id="MonoDevelop.Debugger.WatchPad">
+        <State />
+      </Pad>
+      <Pad Id="MonoDevelop.NUnit.TestPad">
+        <State name="__root__">
+          <Node name="PathFinding" expanded="True" selected="True" />
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore>
+      <Breakpoint file="/Users/vijay.veluri/Git/PathFinding-WayPoint/PathFinding/Assets/WaypointPro/Sample/Script/PathFollowerYSnap.cs" line="30" column="1" />
+      <Breakpoint file="/Users/vijay.veluri/Git/PathFinding-WayPoint/PathFinding/Assets/WaypointPro/Sample/Script/PathFollower.cs" line="114" column="1" />
+    </BreakpointStore>
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>

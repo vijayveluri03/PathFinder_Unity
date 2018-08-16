@@ -35,11 +35,11 @@ namespace Mr1
     }
 
 
-    public class PathData : ScriptableObject
+    [System.Serializable]
+    public class PathData
     {
         public bool bShowPath;
 
-        [SerializeField] public string pathName;
         [SerializeField] public PathLineType lineType;
         [SerializeField] public Color lineColor = Color.yellow;
         [SerializeField] public float pointSize = 0.5f;
@@ -56,6 +56,34 @@ namespace Mr1
             paths = new List<WayPath>();
             pointsSorted = new Dictionary<int, WayPoint>();
             pathsSorted = new Dictionary<int, WayPath>(); 
+        }
+
+        public WayPoint GetWayPoint ( int ID )
+        {
+            if ( pointsSorted.ContainsKey ( ID ) )
+                return pointsSorted[ID];
+            return null;
+        } 
+        public WayPath GetPath ( int ID )
+        {
+            if ( pathsSorted.ContainsKey ( ID ) )
+                return pathsSorted[ID];
+            return null;
+        } 
+
+        public WayPath GetPathBetween ( int from, int to )
+        {
+            foreach ( WayPath pd in paths ) 
+            {
+                if ( 
+                    (pd.IDOfA == from && pd.IDOfB == to )
+                    || (pd.IDOfB == from && pd.IDOfA == to )
+                )
+                {
+                    return pd;
+                }
+            }
+            return null;
         }
 
         public void Refresh ( )

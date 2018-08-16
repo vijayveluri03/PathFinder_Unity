@@ -3,6 +3,7 @@ using UnityEditor;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.SceneManagement;
 
 using Mr1;
 
@@ -11,8 +12,9 @@ public class WaypointManagerEditor : Editor
 {
     enum SceneMode
     {
-        Add,
-        Edit,
+        AddPoint,
+        EditPoint,
+        ConnectPath,
         None
     }
 
@@ -40,85 +42,26 @@ public class WaypointManagerEditor : Editor
             Debug.LogError("Waypoint Manager already exists!");
     }
 
-    PathData CreatePathAsset()
+
+    private void MarkThisDirty ()
     {
-        string strAssetPath = EditorUtility.SaveFilePanelInProject("New Path", "NewPath", "asset", "");
-        
-        if (string.IsNullOrEmpty(strAssetPath))
-            return null; 
-
-        strAssetPath = AssetDatabase.GenerateUniqueAssetPath(strAssetPath);
-
-        int startIndex = strAssetPath.LastIndexOf("/") + 1;
-        int length = strAssetPath.LastIndexOf(".") - startIndex;
-        string strAssetName = strAssetPath.Substring(startIndex, length);
-
-        PathData newPath = ScriptableObject.CreateInstance<PathData>();
-        newPath.pathName = strAssetName;
-
-        AssetDatabase.CreateAsset(newPath, strAssetPath);
-        AssetDatabase.SaveAssets();
-
-        return newPath;
-    }
-
-    PathData LoadPathAsset()
-    {
-        string strAssetPath = EditorUtility.OpenFilePanel("Load Path", "Assets/", "asset");
-        strAssetPath = strAssetPath.Substring(strAssetPath.IndexOf("Assets/"));
-
-        if (string.IsNullOrEmpty(strAssetPath))
-            return null;
-        
-        PathData loadedPath = (PathData)AssetDatabase.LoadAssetAtPath(strAssetPath, typeof(PathData));
-
-        int startIndex = strAssetPath.LastIndexOf("/") + 1;
-        int length = strAssetPath.LastIndexOf(".") - startIndex;
-        string strAssetName = strAssetPath.Substring(startIndex, length);
-
-        loadedPath.pathName = strAssetName;
-
-        return loadedPath;
-    }
-    
-    void SavePathAsset()
-    {
-        AssetDatabase.SaveAssets();
-        
-        foreach (var path in script.pathList)
-            EditorUtility.SetDirty(path);
+        if ( PrefabUtility.GetPrefabParent( script.gameObject ) != null ) 
+        {
+            Debug.Log("Prefab found for WayPointManager!");
+            EditorUtility.SetDirty(script);
+        }
+        else 
+        {
+            Debug.LogWarning("No Prefab found for WayPointManager!");   // This is not an issue , but make sure u save the scene when u modify WayPointManager data
+            EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+        }
     }
 
     void OnEnable()
     {
-   
-        sceneMode = SceneMode.Edit;
+        sceneMode = SceneMode.EditPoint;
         script = target as WaypointManager;
-        if (script.pathList == null) script.pathList = new List<PathData>();
-        for (int i = 0; i < script.pathList.Count; i++)
-        {
-            if (script.pathList[i] == null) script.pathList.RemoveAt(i);
-        }
-
-        //script.selected = null;
-        foreach(var path in script.pathList)
-        {
-            if (path != null)
-            {
-                String strAssetPath = AssetDatabase.GetAssetPath(path);
-                int startIndex = strAssetPath.LastIndexOf("/") + 1;
-                int length = strAssetPath.LastIndexOf(".") - startIndex;
-                path.pathName = strAssetPath.Substring(startIndex, length);
-            }
-        }
-
-        if ( script.selected != null ) 
-            script.selected.Refresh();
-    }
-
-    void OnDisable()
-    {
-       
+        script.pathData.Refresh();
     }
 
 
@@ -130,101 +73,74 @@ public class WaypointManagerEditor : Editor
 
     public override void OnInspectorGUI()
     {
-        RenderButtons();
-
-        CustomGUI.DrawSeparator(Color.gray);
-
-        ShowPointsAndPathInInspector();
-    }
-
-    void RenderButtons()
-    {
-        GUILayout.BeginHorizontal();
-
-        if (GUILayout.Button("New Path"))
+        showDefaultInspector = EditorGUILayout.Toggle ( "Show Default inspector", showDefaultInspector );
+        if ( showDefaultInspector )
         {
-            PathData newPath = CreatePathAsset();
-            if (newPath != null) script.pathList.Add(newPath);
+            DrawDefaultInspector();
         }
-        if (GUILayout.Button("Load Path"))
+        else 
         {
-            PathData loadedPath = LoadPathAsset();
-            if (loadedPath != null)
-            {
-                if (!script.pathList.Contains(loadedPath))
-                    script.pathList.Add(loadedPath);
-            }
+            CustomGUI.DrawSeparator(Color.gray);
+            ShowPointsAndPathInInspector();
         }
-        if (GUILayout.Button("Save Path"))
-        {
-            SavePathAsset();
-        }
-
-        GUILayout.EndHorizontal();
     }
 
     void ShowPointsAndPathInInspector()
     {
-        for (int i = 0; i < script.pathList.Count; i++)
+        script.pathData.pointSize = EditorGUILayout.Slider("Point Size", script.pathData.pointSize, 0.1f, 3f);
+        script.pathData.lineColor = EditorGUILayout.ColorField("Path Color", script.pathData.lineColor);
+        script.pathData.lineType = (PathLineType)EditorGUILayout.EnumPopup("Path Type", script.pathData.lineType);
+
+
+        GUILayout.Label ( "<size=15><b>Way Points</b></size>", Utility.GetStyleWithRichText());
+
+        
+        showPointIDsInTheScene = EditorGUILayout.Toggle ( "Show Point IDs in scene", showPointIDsInTheScene );
+
+        List<WayPoint> wayPointList = script.pathData.points;
+        for (int j = 0; j < wayPointList.Count; j++)
         {
-            Action delAction = () => { script.pathList.RemoveAt(i); };
-            if (script.pathList[i] == null || string.IsNullOrEmpty(script.pathList[i].pathName)) continue;
-            if (CustomGUI.HeaderButton(script.pathList[i].pathName, null, delAction))
+            GUILayout.BeginHorizontal();
             {
-                script.selected = script.pathList[i];
-                script.selected.pointSize = EditorGUILayout.Slider("Point Size", script.selected.pointSize, 0.1f, 3f);
-                script.selected.lineColor = EditorGUILayout.ColorField("Path Color", script.selected.lineColor);
-                script.selected.lineType = (PathLineType)EditorGUILayout.EnumPopup("Path Type", script.selected.lineType);
+                EditorGUILayout.LabelField ("\t" + "Point <Color=" + WayPointTextcolor + ">" + wayPointList[j].autoGeneratedID + "</Color>", Utility.GetStyleWithRichText(), GUILayout.Width ( 120f ) );
 
-
-                GUILayout.Label ( "<size=15><b>Way Points</b></size>", Utility.GetStyleWithRichText());
-
-                
-                showPointIDsInTheScene = EditorGUILayout.Toggle ( "Show Point IDs in scene", showPointIDsInTheScene );
-
-                List<WayPoint> wayPointList = script.selected.points;
-                for (int j = 0; j < wayPointList.Count; j++)
-                {
-                    GUILayout.BeginHorizontal();
-                    {
-                        EditorGUILayout.LabelField ("\t" + "Point <Color=" + WayPointTextcolor + ">" + wayPointList[j].autoGeneratedID + "</Color>", Utility.GetStyleWithRichText(), GUILayout.Width ( 120f ) );
-
-                        wayPointList[j].position = EditorGUILayout.Vector3Field("", wayPointList[j].position);
-                        if (GUILayout.Button("+", GUILayout.Width(25f)))
-                            AddWaypoint(wayPointList[j].position + Vector3.right + Vector3.up, j + 1);
-                        if (GUILayout.Button("-", GUILayout.Width(25f)))
-                            DeleteWaypoint(j);
-                    }
-                    GUILayout.EndHorizontal();
-                }
-
-
-                GUILayout.Label ( "<size=15><b>Way Paths</b></size>", Utility.GetStyleWithRichText());
-                showPathIDsInTheScene = EditorGUILayout.Toggle ( "Show Path IDs in scene", showPathIDsInTheScene );
-                showCostsInTheScene = EditorGUILayout.Toggle ( "Show Path Costs in scene", showCostsInTheScene );
-
-                List<WayPath> wayPaths = script.selected.paths;
-                for (int j = 0; j < wayPaths.Count; j++)
-                {
-                    GUILayout.BeginHorizontal();
-                    {
-                        EditorGUILayout.LabelField ("\t" + "Path <Color=" + ConnectionTextcolor + ">" + wayPaths[j].autoGeneratedID + "</Color>", Utility.GetStyleWithRichText(), GUILayout.Width ( 120f ) );
-
-                        EditorGUILayout.LabelField ("From", EditorStyles.miniLabel, GUILayout.Width(30f) ); wayPaths[j].IDOfA = EditorGUILayout.IntField (wayPaths[j].IDOfA, GUILayout.Width(50f)  );
-                        EditorGUILayout.LabelField ("To", EditorStyles.miniLabel, GUILayout.Width(25f) ); wayPaths[j].IDOfB = EditorGUILayout.IntField (wayPaths[j].IDOfB, GUILayout.Width(50f)  );
-                        EditorGUILayout.LabelField ( "<Color=" + CostTextcolor + ">" + "Cost" + "</Color>", Utility.GetStyleWithRichText(EditorStyles.miniLabel), GUILayout.Width(30f) ); wayPaths[j].cost = EditorGUILayout.IntField (wayPaths[j].cost, GUILayout.Width(50f)  );
-
-                        EditorGUILayout.LabelField ("One Way", EditorStyles.miniLabel, GUILayout.Width(50f) ); wayPaths[j].isOneWay = EditorGUILayout.Toggle (wayPaths[j].isOneWay );
-
-                        if (GUILayout.Button("+", GUILayout.Width(25f)))
-                            AddWayPath(j + 1);
-                        if (GUILayout.Button("-", GUILayout.Width(25f)))
-                            DeleteWayPath(j);
-                    }
-                    GUILayout.EndHorizontal();
-                }
+                wayPointList[j].position = EditorGUILayout.Vector3Field("", wayPointList[j].position);
+                if (GUILayout.Button("+", GUILayout.Width(25f)))
+                    AddWaypoint(wayPointList[j].position + Vector3.right + Vector3.up, j + 1);
+                if (GUILayout.Button("-", GUILayout.Width(25f)))
+                    DeleteWaypoint(j);
             }
+            GUILayout.EndHorizontal();
         }
+
+
+        GUILayout.Label ( "<size=15><b>Way Paths</b></size>", Utility.GetStyleWithRichText());
+        showPathIDsInTheScene = EditorGUILayout.Toggle ( "Show Path IDs in scene", showPathIDsInTheScene );
+        showCostsInTheScene = EditorGUILayout.Toggle ( "Show Path Costs in scene", showCostsInTheScene );
+
+        List<WayPath> wayPaths = script.pathData.paths;
+        for (int j = 0; j < wayPaths.Count; j++)
+        {
+            GUILayout.BeginHorizontal();
+            {
+                EditorGUILayout.LabelField ("\t" + "Path <Color=" + ConnectionTextcolor + ">" + wayPaths[j].autoGeneratedID + "</Color>", Utility.GetStyleWithRichText(), GUILayout.Width ( 120f ) );
+
+                EditorGUILayout.LabelField ("From", EditorStyles.miniLabel, GUILayout.Width(30f) ); wayPaths[j].IDOfA = EditorGUILayout.IntField (wayPaths[j].IDOfA, GUILayout.Width(50f)  );
+                EditorGUILayout.LabelField ("To", EditorStyles.miniLabel, GUILayout.Width(25f) ); wayPaths[j].IDOfB = EditorGUILayout.IntField (wayPaths[j].IDOfB, GUILayout.Width(50f)  );
+                EditorGUILayout.LabelField ( "<Color=" + CostTextcolor + ">" + "Cost" + "</Color>", Utility.GetStyleWithRichText(EditorStyles.miniLabel), GUILayout.Width(30f) ); wayPaths[j].cost = EditorGUILayout.IntField (wayPaths[j].cost, GUILayout.Width(50f)  );
+
+                EditorGUILayout.LabelField ("One Way", EditorStyles.miniLabel, GUILayout.Width(50f) ); wayPaths[j].isOneWay = EditorGUILayout.Toggle (wayPaths[j].isOneWay );
+
+                if (GUILayout.Button("+", GUILayout.Width(25f)))
+                    AddWayPath(j + 1);
+                if (GUILayout.Button("-", GUILayout.Width(25f)))
+                    DeleteWayPath(j);
+            }
+            GUILayout.EndHorizontal();
+        }
+
+        if ( GUI.changed )
+            MarkThisDirty();
     }
 
 #endregion
@@ -236,18 +152,21 @@ public class WaypointManagerEditor : Editor
         int controlID = GUIUtility.GetControlID(FocusType.Passive);
         HandleUtility.AddDefaultControl(controlID);
 
-        if (script.selected != null)
         {
-            DrawWindow();
+            DrawGUIWindowOnScene();
             UpdateMouseInput();
 
-            if (sceneMode == SceneMode.Add)
+            if (sceneMode == SceneMode.AddPoint)
             {
                 DrawWaypoints( Color.green );
             }
-            else if (sceneMode == SceneMode.Edit)
+            else if (sceneMode == SceneMode.EditPoint)
             {
                 DrawWaypoints ( Color.magenta, true );
+            }
+            else if ( sceneMode == SceneMode.ConnectPath )
+            {
+				DrawWaypoints( Color.green, false, script.pathData.GetWayPoint( selectedPointForConnectPointsMode ), Color.red );
             }
             else 
                 DrawWaypoints ( Color.gray );
@@ -267,75 +186,68 @@ public class WaypointManagerEditor : Editor
             SceneView.RepaintAll();
         }
     }
-    void DrawWindow()
+    void DrawGUIWindowOnScene()
     {
-        GUILayout.Window(1, new Rect(0f, 25f, 70f, 80f), DoWaypointWindow, script.selected.pathName);
+        GUILayout.Window(1, new Rect(0f, 25f, 70f, 80f), 
+                                                        delegate ( int windowID )
+                                                        {
+                                                            EditorGUILayout.BeginHorizontal();
+
+                                                            sceneMode = (SceneMode)GUILayout.SelectionGrid((int)sceneMode, System.Enum.GetNames(typeof(SceneMode)), 1);
+
+                                                            GUI.color = Color.white;
+
+                                                            EditorGUILayout.EndHorizontal();
+                                                        }
+            , "Mode");
+        GUILayout.Window(2, new Rect(0, 155f, 70f, 80f), 
+                                                        delegate(int windowID)
+                                                        {
+                                                            EditorGUILayout.BeginVertical();
+
+                                                            //sceneMode = (SceneMode)GUILayout.SelectionGrid((int)sceneMode, System.Enum.GetNames(typeof(SceneMode)), 1);
+
+                                                            // if (GUILayout.Button("Add - Immediate"))
+                                                            //     AddImmediateWaypoint();
+
+                                                            if (GUILayout.Button("Delete Point"))
+                                                                DeleteWaypoint();
+
+                                                            if (GUILayout.Button("Delete Path"))
+                                                                DeleteWayPath();
+
+                                                            if (GUILayout.Button("Clear"))
+                                                            {
+                                                                ClearWaypoint();
+                                                                ClearWayPath();
+                                                            }
+
+                                                            if (GUILayout.Button("Refresh Data"))
+                                                            {
+                                                                script.pathData.Refresh();   
+                                                            }
+                                                            GUI.color = Color.white;
+
+                                                            EditorGUILayout.EndVertical();
+                                                        }
+            , "");
     }
+    
 
-    void DoWaypointWindow(int windowID)
-    {
-        EditorGUILayout.BeginVertical();
-
-        sceneMode = (SceneMode)GUILayout.SelectionGrid((int)sceneMode, System.Enum.GetNames(typeof(SceneMode)), 1);
-
-        if (GUILayout.Button("Add - Immediate"))
-            AddImmediateWaypoint();
-
-        if (GUILayout.Button("Del"))
-            DeleteWaypoint();
-
-        if (GUILayout.Button("Clear"))
-        {
-            ClearWaypoint();
-            ClearWayPath();
-        }
-
-		if (GUILayout.Button("Refresh"))
-        {
-            if ( script.selected != null ) 
-                script.selected.Refresh();   
-        }
-
-        if (GUILayout.Button("Do something "))
-		{
-            string str = "";
-            foreach ( var a in script.FindShortedPath( 1, 8 ) ) 
-            {
-                str += "=>" + a.autoGeneratedID.ToString();
-            }
-            Debug.LogWarning("Path:" + str);
-            // {
-            //     float startTime = Time.realtimeSinceStartup;
-            //     Debug.Log("Hello: " + Time.realtimeSinceStartup );
-            //     script.FindShortestPathAsynchronous( 1, 8, delegate ( List<WayPoint> wayPoints ) 
-            //     { 
-            //         string str = "";
-            //         foreach ( var a in wayPoints ) 
-            //         {
-            //             str += "=>" + a.autoGeneratedID.ToString();
-            //         }
-            //         Debug.LogWarning("Path: " + str);
-            //         Debug.Log("Time Taken:" + (Time.realtimeSinceStartup - startTime));
-            //     } );
-            // }
-        }
-
-        GUI.color = Color.green;
-        script.selected.lineType = (PathLineType)EditorGUILayout.EnumPopup(script.selected.lineType);
-        GUI.color = Color.white;
-
-        EditorGUILayout.EndVertical();
-    }
-
-    void DrawWaypoints( Color color, bool canMove = false  )
+    void DrawWaypoints( Color color, bool canMove = false, WayPoint selectedPoint = null, Color colorForSelected = default(Color) )
     {
         Handles.color = color;
-        foreach (var point in script.selected.points)
+        foreach (var point in script.pathData.points)
         {
+            if ( selectedPoint != null && point == selectedPoint )
+                Handles.color = colorForSelected;
+            else 
+                Handles.color = color;
+
             if ( canMove ) 
-                point.position = Handles.FreeMoveHandle(point.position, Quaternion.identity, script.selected.pointSize, Vector3.zero, Handles.SphereCap);
+                point.position = Handles.FreeMoveHandle(point.position, Quaternion.identity, script.pathData.pointSize, Vector3.zero, Handles.SphereCap);
             else
-                Handles.SphereCap(0, point.position, Quaternion.identity, script.selected.pointSize);
+                Handles.SphereCap(0, point.position, Quaternion.identity, script.pathData.pointSize);
         }
         Handles.color = Color.white;
 
@@ -346,69 +258,17 @@ public class WaypointManagerEditor : Editor
     }
 
 
-    // void DrawHandlePointInEditMode( )
-    // {
-    //     List<WayPoint> wayPoints = script.selected.points;
-
-    //     for (int i = 0; i < wayPoints.Count; i++)
-    //     {
-    //         Handles.color = Color.magenta;
-    //         wayPoints[i].position = Handles.FreeMoveHandle(wayPoints[i].position, Quaternion.identity, script.selected.pointSize, Vector3.zero, Handles.SphereCap);
-
-    //         // if (script.selected.lineType == PathLineType.BezierCurve)
-    //         // {
-    //         //     Vector3 firstControlPoint = wayPoints[i] + script.selected.firstHandles[i];
-    //         //     Vector3 secondControlPoint = wayPoints[i] + script.selected.secondHandles[i];
-
-    //         //     Handles.color = Color.gray;
-    //         //     if (i != 0)
-    //         //     {
-    //         //         Vector3 movedPoint = Handles.FreeMoveHandle(firstControlPoint, Quaternion.identity, script.selected.pointSize, Vector3.zero, Handles.SphereCap);
-    //         //         if (firstControlPoint != movedPoint)
-    //         //         {
-    //         //             firstControlPoint = movedPoint - wayPoints[i];
-
-    //         //             Quaternion qRot = Quaternion.FromToRotation(script.selected.firstHandles[i], firstControlPoint);
-    //         //             script.selected.secondHandles[i] = qRot * script.selected.secondHandles[i];
-    //         //             script.selected.firstHandles[i] = firstControlPoint;
-    //         //         }
-    //         //         Handles.DrawLine(wayPoints[i], firstControlPoint);
-    //         //     }
-    //         //     if (i != wayPoints.Count - 1)
-    //         //     {
-    //         //         Vector3 movedPoint = Handles.FreeMoveHandle(secondControlPoint, Quaternion.identity, script.selected.pointSize, Vector3.zero, Handles.SphereCap);
-    //         //         if (secondControlPoint != movedPoint)
-    //         //         {
-    //         //             secondControlPoint = movedPoint - wayPoints[i];
-
-    //         //             Quaternion qRot = Quaternion.FromToRotation(script.selected.secondHandles[i], secondControlPoint);
-    //         //             script.selected.firstHandles[i] = qRot * script.selected.firstHandles[i];
-    //         //             script.selected.secondHandles[i] = secondControlPoint;
-    //         //         }
-    //         //         Handles.DrawLine(wayPoints[i], secondControlPoint);
-    //         //     }
-    //         //     Handles.color = Color.white;
-    //         // }
-    //     }
-
-    //     Handles.color = Color.white;
-
-    //     // GUI display about the way points in the scene view
-    //     DrawGUIDisplayForPoints();
-
-    //     Handles.color = Color.white;
-    // }
 
     void DrawPathLine()
     {
-        List<WayPath> paths = script.selected.paths;
-        List<WayPoint> linePoints = script.selected.points;
+        List<WayPath> paths = script.pathData.paths;
+        List<WayPoint> linePoints = script.pathData.points;
         Vector3 currPoint;
         Vector2 guiPosition;
 
         if (paths == null || linePoints == null ) return;
 
-        Handles.color = script.selected.lineColor;
+        Handles.color = script.pathData.lineColor;
         WayPoint a,b;
 
         
@@ -417,11 +277,11 @@ public class WaypointManagerEditor : Editor
         {
             a = b = null;
 
-            if ( script.selected.pointsSorted.ContainsKey(paths[i].IDOfA))
-                a = script.selected.pointsSorted[paths[i].IDOfA];
+            if ( script.pathData.pointsSorted.ContainsKey(paths[i].IDOfA))
+                a = script.pathData.pointsSorted[paths[i].IDOfA];
 
-            if ( script.selected.pointsSorted.ContainsKey(paths[i].IDOfB))
-                b = script.selected.pointsSorted[paths[i].IDOfB];
+            if ( script.pathData.pointsSorted.ContainsKey(paths[i].IDOfB))
+                b = script.pathData.pointsSorted[paths[i].IDOfB];
 
             if ( a != null && b != null && a != b ) 
             {
@@ -467,9 +327,9 @@ public class WaypointManagerEditor : Editor
         Vector2 guiPosition;
 
         Handles.BeginGUI();
-        for ( int i = 0; i < script.selected.points.Count; i++ ) 
+        for ( int i = 0; i < script.pathData.points.Count; i++ ) 
         {
-            currPoint = script.selected.points[i];
+            currPoint = script.pathData.points[i];
 
             guiPosition = HandleUtility.WorldToGUIPoint ( currPoint.position );
             
@@ -492,24 +352,36 @@ public class WaypointManagerEditor : Editor
         }
         else if ( e.type == EventType.MouseUp )
         {
-            EditorUtility.SetDirty(script);
+            MarkThisDirty();
         }
             
     }
 
     void OnMouseClick(Vector2 mousePos)
     {
-        if( sceneMode != SceneMode.Add ) 
-            return;
-
-        LayerMask backgroundLayerMask = 1 << script.gameObject.layer;
-
-        Ray ray = HandleUtility.GUIPointToWorldRay(mousePos);
-        RaycastHit hit;
-        if (Physics.Raycast(ray, out hit, 1000f, backgroundLayerMask))
+        if( sceneMode == SceneMode.AddPoint ) 
         {
-            Vector3 hitPos = hit.point;
-            AddWaypoint(hitPos);
+            LayerMask backgroundLayerMask = 1 << script.gameObject.layer;
+
+            Ray ray = HandleUtility.GUIPointToWorldRay(mousePos);
+            RaycastHit hit;
+            if (Physics.Raycast(ray, out hit, 1000f, backgroundLayerMask))
+            {
+                Vector3 hitPos = hit.point;
+                AddWaypoint(hitPos);
+            }
+        }
+        else if ( sceneMode == SceneMode.ConnectPath )
+        {
+            LayerMask backgroundLayerMask = 1 << script.gameObject.layer;
+
+            Ray ray = HandleUtility.GUIPointToWorldRay(mousePos);
+            RaycastHit hit;
+            if (Physics.Raycast(ray, out hit, 1000f, backgroundLayerMask))
+            {
+                Vector3 hitPos = hit.point;
+                TryAddConnection ( hitPos );
+            }
         }
     }
 
@@ -522,7 +394,7 @@ public class WaypointManagerEditor : Editor
 #region Line Points Setting Method
     void SetStraightLine()
     {
-        // List<Vector3> wayPoints = script.selected.points;
+        // List<Vector3> wayPoints = script.pathData.points;
         // if (wayPoints.Count < 2)
         //     return;
 
@@ -531,16 +403,16 @@ public class WaypointManagerEditor : Editor
         //     for (float t = 0f; t <= 1.0f; t += 0.05f)
         //     {
         //         Vector3 pt = wayPoints[i] * (1f - t) + wayPoints[i + 1] * t;
-        //         script.selected.linePoints.Add(pt);
+        //         script.pathData.linePoints.Add(pt);
         //     }
         // }
 
-        // script.selected.linePoints.Add(wayPoints[wayPoints.Count - 1]);
+        // script.pathData.linePoints.Add(wayPoints[wayPoints.Count - 1]);
     }
 
     void SetCatmullRomCurveLine()
     {
-        // List<Vector3> wayPoints = script.selected.points;
+        // List<Vector3> wayPoints = script.pathData.points;
 
         // if (wayPoints.Count < 3)
         //     return;
@@ -554,18 +426,18 @@ public class WaypointManagerEditor : Editor
         // catmullRomPoints[endIndex] = catmullRomPoints[endIndex - 1] + (catmullRomPoints[endIndex - 1] - catmullRomPoints[endIndex - 2])
         //                         + (catmullRomPoints[endIndex - 3] - catmullRomPoints[endIndex - 2]);
 
-        // script.selected.linePoints.Add(wayPoints[0]);
+        // script.pathData.linePoints.Add(wayPoints[0]);
 
         // for (int i = 0; i < catmullRomPoints.Length - 3; i++)
         // {
         //     for (float t = 0.05f; t <= 1.0f; t += 0.05f)
         //     {
         //         Vector3 pt = ComputeCatmullRom(catmullRomPoints[i], catmullRomPoints[i + 1], catmullRomPoints[i + 2], catmullRomPoints[i + 3], t);
-        //         script.selected.linePoints.Add(pt);
+        //         script.pathData.linePoints.Add(pt);
         //     }
         // }
 
-        // script.selected.linePoints.Add(wayPoints[wayPoints.Count - 1]);
+        // script.pathData.linePoints.Add(wayPoints[wayPoints.Count - 1]);
     }
 
     Vector3 ComputeCatmullRom(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float t)
@@ -583,14 +455,14 @@ public class WaypointManagerEditor : Editor
 
     void SetBezierCurveLine()
     {
-        // List<Vector3> wayPoints = script.selected.points;
-        // List<Vector3> firstControls = script.selected.firstHandles;
-        // List<Vector3> secondControls = script.selected.secondHandles;
+        // List<Vector3> wayPoints = script.pathData.points;
+        // List<Vector3> firstControls = script.pathData.firstHandles;
+        // List<Vector3> secondControls = script.pathData.secondHandles;
 
         // if (wayPoints.Count < 2)
         //     return;
 
-        // script.selected.linePoints.Add(wayPoints[0]);
+        // script.pathData.linePoints.Add(wayPoints[0]);
 
         // for (int i = 0; i < wayPoints.Count - 1; i++)
         // {
@@ -603,11 +475,11 @@ public class WaypointManagerEditor : Editor
         //     {
         //         Vector3 pt = ComputeBezier(waypoint1, controlPoint1, controlPoint2, waypoint2, t);
 
-        //         script.selected.linePoints.Add(pt);
+        //         script.pathData.linePoints.Add(pt);
         //     }
         // }
 
-        // script.selected.linePoints.Add(wayPoints[wayPoints.Count-1]);
+        // script.pathData.linePoints.Add(wayPoints[wayPoints.Count-1]);
     }
 
     Vector3 ComputeBezier(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float t)
@@ -627,92 +499,100 @@ public class WaypointManagerEditor : Editor
     void AddWaypoint(Vector3 position, int addIndex = -1)
     {
         if (addIndex == -1)
-            script.selected.points.Add( new WayPoint( position ));
+            script.pathData.points.Add( new WayPoint( position ));
         else
-            script.selected.points.Insert(addIndex, new WayPoint( position ));
+            script.pathData.points.Insert(addIndex, new WayPoint( position ));
 
-        if ( script.selected != null ) 
-            script.selected.Refresh();
+        script.pathData.Refresh();
     }
 	
-	void AddImmediateWaypoint()
-    {
-        Vector3 position = Vector3.zero;;
-
-        const float distanceOffset = 5;
-
-        if (script.selected.points == null || script.selected.points.Count == 0)
-        {
-            position = Vector3.zero;
-        }
-        else if ( script.selected.points.Count == 1 )
-        {
-            position += Vector3.right * distanceOffset;
-        }
-        else 
-        {
-            position = script.selected.points[script.selected.points.Count - 1].position;
-            Vector3 dir = ( script.selected.points[script.selected.points.Count - 1].position - script.selected.points[script.selected.points.Count - 2].position ).normalized;
-            position += dir * distanceOffset;
-        }
-
-        script.selected.points.Add( new WayPoint( position ));
-
-        if ( script.selected != null ) 
-            script.selected.Refresh();
-    }
-
     void DeleteWaypoint(int removeIndex = -1)
     {
-        List<WayPoint> wayPointList = script.selected.points;
+        List<WayPoint> wayPointList = script.pathData.points;
         if (wayPointList == null || wayPointList.Count == 0)
             return;
 
         if (removeIndex == -1) removeIndex = wayPointList.Count - 1;
         wayPointList.RemoveAt(removeIndex);
         
-        if ( script.selected != null ) 
-            script.selected.Refresh();
+        script.pathData.Refresh();
     }
 
     void ClearWaypoint()
     {
-        script.selected.points.Clear();
+        script.pathData.points.Clear();
     }
 
-    void AddWayPath( int addIndex = -1)
+	void AddWayPath( int addIndex = -1, int from = -1, int to = -1)
     {
-        if (addIndex == -1)
-            script.selected.paths.Add( new WayPath( -1, -1 ));
-        else
-            script.selected.paths.Insert(addIndex, new WayPath( -1, -1 ));
+		if ( from != -1 && to != -1 )
+		{
+			if ( from == to ) 
+			{
+				Debug.LogError("Error. Preventing from adding Path to the same node");
+				return;
+			}
+			WayPath pd = script.pathData.GetPathBetween ( from, to );
+			if ( pd != null ) 
+			{
+				Debug.LogError("Error. We already have a path between these nodes. Aborted");
+				return;
+			}
+		}
 
-        // script.selected.firstHandles.Add(Vector3.left);
-        // script.selected.secondHandles.Add(Vector3.right);
-        if ( script.selected != null ) 
-            script.selected.Refresh();
+        if (addIndex == -1)
+			script.pathData.paths.Add( new WayPath( from, to ));
+        else
+            script.pathData.paths.Insert(addIndex, new WayPath( from, to ));
+
+        // script.pathData.firstHandles.Add(Vector3.left);
+        // script.pathData.secondHandles.Add(Vector3.right);
+        script.pathData.Refresh();
     }
 
     void DeleteWayPath(int removeIndex = -1)
     {
-        List<WayPath> wayPathList = script.selected.paths;
+        List<WayPath> wayPathList = script.pathData.paths;
         if (wayPathList == null || wayPathList.Count == 0)
             return;
 
         if (removeIndex == -1) removeIndex = wayPathList.Count - 1;
         wayPathList.RemoveAt(removeIndex);
-        // script.selected.firstHandles.RemoveAt(removeIndex);
-        // script.selected.secondHandles.RemoveAt(removeIndex);
-        if ( script.selected != null ) 
-            script.selected.Refresh();
+        // script.pathData.firstHandles.RemoveAt(removeIndex);
+        // script.pathData.secondHandles.RemoveAt(removeIndex);
+        script.pathData.Refresh();
     }
 
-    void ClearWayPath()
+     void ClearWayPath()
     {
-        script.selected.paths.Clear();
-        // script.selected.firstHandles.Clear();
-        // script.selected.secondHandles.Clear();
+        script.pathData.paths.Clear();
+        // script.pathData.firstHandles.Clear();
+        // script.pathData.secondHandles.Clear();
     }
+
+    void TryAddConnection(Vector3 position )
+    {
+        WayPoint selectedPoint =  script.pathData.GetWayPoint( script.FindNearestWayPoint ( position ) );
+
+        if ( selectedPoint == null )
+        {
+            Debug.LogError("ERROR. could not find any nearest point");
+			return;
+        }
+
+        if ( selectedPointForConnectPointsMode != -1 ) 
+        {
+			AddWayPath ( -1, selectedPointForConnectPointsMode, selectedPoint.autoGeneratedID ) ;
+			selectedPointForConnectPointsMode = -1;
+        }
+        else 
+        {
+			selectedPointForConnectPointsMode = selectedPoint.autoGeneratedID;
+        }
+
+    }
+
+   
 
 
 #endregion
@@ -723,7 +603,9 @@ public class WaypointManagerEditor : Editor
 
 #endregion
 
+    private int selectedPointForConnectPointsMode = -1;
     private bool showPointIDsInTheScene = true;
     private bool showPathIDsInTheScene = true;
     private bool showCostsInTheScene = false;
+    private bool showDefaultInspector = false;
 }

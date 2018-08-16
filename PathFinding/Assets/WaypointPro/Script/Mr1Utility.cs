@@ -80,7 +80,7 @@ namespace Mr1
 			float minDistance = float.MaxValue;
 			WayPoint nearestWayPoint = null;
 
-			foreach ( var wayPoint in manager.selected.points )
+			foreach ( var wayPoint in manager.pathData.points )
 			{
 				if ( Vector3.Distance ( wayPoint.position, point ) < minDistance ) 
 				{
