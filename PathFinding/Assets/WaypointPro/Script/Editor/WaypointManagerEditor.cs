@@ -90,6 +90,7 @@ public class WaypointManagerEditor : Editor
         script.graphData.nodeSize = EditorGUILayout.Slider("Node gizmo Size", script.graphData.nodeSize, 0.1f, 3f);
         script.graphData.lineColor = EditorGUILayout.ColorField("Path Color", script.graphData.lineColor);
         script.graphData.lineType = (PathLineType)EditorGUILayout.EnumPopup("Path Type", script.graphData.lineType);
+        script.graphData.offsetFromTheGround = EditorGUILayout.FloatField("Offset from ground( Height )", script.graphData.offsetFromTheGround );
         EditorGUILayout.Space();
 
         GUILayout.Label ( "<size=12><b>Nodes</b></size>", GetStyleWithRichText());
@@ -116,6 +117,7 @@ public class WaypointManagerEditor : Editor
 
         GUILayout.Label ( "<size=12><b>Paths</b></size>", GetStyleWithRichText());
         showPathIDsInTheScene = EditorGUILayout.Toggle ( "Show Path IDs in scene", showPathIDsInTheScene );
+        drawPathsInTheScene = EditorGUILayout.Toggle ( "Draw Paths", drawPathsInTheScene );
         showCostsInTheScene = EditorGUILayout.Toggle ( "Show Path Costs in scene", showCostsInTheScene );
 
         List<Path> paths = script.graphData.paths;
@@ -280,7 +282,8 @@ public class WaypointManagerEditor : Editor
 
             if ( a != null && b != null && a != b ) 
             {
-                Handles.DrawLine(a.position, b.position);
+                if ( drawPathsInTheScene )
+                    Handles.DrawLine(a.position, b.position);
 
                 Handles.BeginGUI();
                 {
@@ -363,6 +366,7 @@ public class WaypointManagerEditor : Editor
             if (Physics.Raycast(ray, out hit, 1000f, backgroundLayerMask))
             {
                 Vector3 hitPos = hit.point;
+                hitPos += ( -ray.direction.normalized ) * script.graphData.offsetFromTheGround;
                 AddNode(hitPos);
             }
         }
@@ -500,6 +504,7 @@ public class WaypointManagerEditor : Editor
     private int selectedNodeForConnectNodesMode = -1;
     private bool showNodeIDsInTheScene = true;
     private bool showPathIDsInTheScene = true;
+    private bool drawPathsInTheScene = true;
     private bool showCostsInTheScene = false;
     private bool showDefaultInspector = false;
 }

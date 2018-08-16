@@ -42,13 +42,12 @@ namespace Mr1
 
             //WaypointManager.instance.selected.Refresh();
             {
-                WaypointManager.instance.CreatePath( playerObj.transform.position, hitPos,  
+                WaypointManager.instance.FindShortestPathBetweenPointsAsynchronous( playerObj.transform.position, hitPos,  WaypointManager.instance.graphData.lineType,
+                
                     delegate ( List<Vector3> wayPoints ) 
                     { 
                        PathFinderUtility.FollowPathWithGroundSnap ( playerObj.transform, wayPoints, playerSpeed, Vector3.down, 5, 0.1f, 200, LayerMask.NameToLayer("Default"));
-                    },
-                    WaypointManager.instance.graphData.lineType,
-                    false
+                    }
                  );
             }
         }

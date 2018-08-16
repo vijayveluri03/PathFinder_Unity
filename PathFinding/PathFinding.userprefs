@@ -2,53 +2,13 @@
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
   <MonoDevelop.Ide.Workbench ActiveDocument="Assets/WaypointPro/Sample/Script/Mr1Utility.cs">
     <Files>
-      <File FileName="Assets/WaypointPro/Sample/Script/PathFollowerYSnap.cs" Line="9" Column="44" />
-      <File FileName="Assets/WaypointPro/Sample/Script/PathFollower.cs" Line="88" Column="10" />
-      <File FileName="Assets/WaypointPro/Sample/Script/MouseClickDemo.cs" Line="27" Column="17" />
-      <File FileName="Assets/WaypointPro/Script/WaypointManager.cs" Line="20" Column="10" />
-      <File FileName="Assets/WaypointPro/Script/Editor/WaypointManagerEditor.cs" Line="261" Column="26" />
-      <File FileName="Assets/WaypointPro/Sample/Script/Mr1Utility.cs" Line="42" Column="8" />
+      <File FileName="Assets/WaypointPro/Sample/Script/PathFollowerYSnap.cs" Line="1" Column="1" />
+      <File FileName="Assets/WaypointPro/Sample/Script/PathFollower.cs" Line="1" Column="1" />
+      <File FileName="Assets/WaypointPro/Sample/Script/MouseClickDemo.cs" Line="1" Column="1" />
+      <File FileName="Assets/WaypointPro/Script/WaypointManager.cs" Line="1" Column="1" />
+      <File FileName="Assets/WaypointPro/Script/Editor/WaypointManagerEditor.cs" Line="1" Column="1" />
+      <File FileName="Assets/WaypointPro/Sample/Script/Mr1Utility.cs" Line="1" Column="1" />
     </Files>
-    <Pads>
-      <Pad Id="ProjectPad">
-        <State name="__root__">
-          <Node name="PathFinding" expanded="True">
-            <Node name="Assembly-CSharp" expanded="True">
-              <Node name="Assets" expanded="True">
-                <Node name="WaypointPro" expanded="True">
-                  <Node name="Sample" expanded="True">
-                    <Node name="Script" expanded="True">
-                      <Node name="Mr1Utility.cs" selected="True" />
-                    </Node>
-                  </Node>
-                </Node>
-              </Node>
-            </Node>
-            <Node name="Assembly-CSharp-Editor" expanded="True">
-              <Node name="Assets" expanded="True">
-                <Node name="WaypointPro" expanded="True">
-                  <Node name="Script" expanded="True">
-                    <Node name="Editor" expanded="True" />
-                  </Node>
-                </Node>
-              </Node>
-            </Node>
-          </Node>
-        </State>
-      </Pad>
-      <Pad Id="MonoDevelop.Debugger.WatchPad">
-        <State>
-          <Value>allnodes[0]</Value>
-          <Value>allnodes[1]</Value>
-          <Value>allnodes.Count</Value>
-        </State>
-      </Pad>
-      <Pad Id="MonoDevelop.NUnit.TestPad">
-        <State name="__root__">
-          <Node name="PathFinding" expanded="True" selected="True" />
-        </State>
-      </Pad>
-    </Pads>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore>

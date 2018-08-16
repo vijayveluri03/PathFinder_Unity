@@ -43,11 +43,11 @@ namespace Mr1
     [System.Serializable]
     public class GraphData
     {
-        public bool bShowPath;
-
+        
         [SerializeField] public PathLineType lineType;
         [SerializeField] public Color lineColor = Color.yellow;
         [SerializeField] public float nodeSize = 0.5f;
+        [SerializeField] public float offsetFromTheGround = 0;  // this represents how much offset we create our points from the ground ?
 
         [SerializeField] public List<Node> nodes;
         [SerializeField] public List<Path> paths;
