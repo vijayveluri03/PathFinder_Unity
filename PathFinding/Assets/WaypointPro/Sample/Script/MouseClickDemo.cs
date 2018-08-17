@@ -10,6 +10,7 @@ namespace Mr1
         public string pathName;
         public Camera camera;
         public float playerSpeed = 20.0f;
+        public bool thoroughPathFinding = false;
 
         public GameObject playerObj;
 
@@ -42,7 +43,8 @@ namespace Mr1
 
             //WaypointManager.instance.selected.Refresh();
             {
-                WaypointManager.instance.FindShortestPathBetweenPointsAsynchronous( playerObj.transform.position, hitPos,  WaypointManager.instance.graphData.lineType,
+                WaypointManager.instance.FindShortestPathBetweenPointsAsynchronous( playerObj.transform.position, hitPos,  WaypointManager.instance.graphData.lineType, 
+                    thoroughPathFinding ? PathFinderUtility.SearchMode.Complex: PathFinderUtility.SearchMode.Simple,
                 
                     delegate ( List<Vector3> wayPoints ) 
                     { 
