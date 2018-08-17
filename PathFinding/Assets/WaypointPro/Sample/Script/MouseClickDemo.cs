@@ -6,11 +6,11 @@ namespace Mr1
 {
     public class MouseClickDemo : MonoBehaviour
     {
-        public Transform target;
         public string pathName;
         public Camera camera;
         public float playerSpeed = 20.0f;
         public bool thoroughPathFinding = false;
+        public bool useGroundSnap = false;
 
         public GameObject playerObj;
 
@@ -48,7 +48,11 @@ namespace Mr1
                 
                     delegate ( List<Vector3> wayPoints ) 
                     { 
-                       PathFinderUtility.FollowPathWithGroundSnap ( playerObj.transform, wayPoints, playerSpeed, Vector3.down, 5, 0.1f, 200, LayerMask.NameToLayer("Default"));
+                        if ( useGroundSnap )
+                           PathFinderUtility.FollowPathWithGroundSnap ( playerObj.transform, wayPoints, playerSpeed, Vector3.down, 5, 0.1f, 200, LayerMask.NameToLayer("Default"));
+                        else 
+                            PathFinderUtility.FollowPath ( playerObj.transform, wayPoints, playerSpeed );
+
                     }
                  );
             }

@@ -148,5 +148,18 @@ namespace Mr1
 
             EditorGUILayout.Space();
         }
+
+        public static GUIStyle GetStyleWithRichText ( GUIStyle style = null )
+        {
+            style = style != null ? style : new GUIStyle();
+            style.richText = true;
+            return style;
+        }
+        public static GUIStyle SetAlignmentForText ( TextAnchor anchor, GUIStyle style = null )
+        {
+            style = style != null ? style : new GUIStyle();
+            style.alignment = anchor;
+            return style;
+        }
     }
 }
