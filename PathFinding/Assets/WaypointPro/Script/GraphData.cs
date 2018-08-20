@@ -4,7 +4,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Mr1
+namespace QPathFinder
 {
     public enum PathLineType
     {

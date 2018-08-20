@@ -1,14 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using Mr1;
+using QPathFinder;
 
-namespace Mr1
+namespace QPathFinder
 {
-    public class WaypointManager : MonoBehaviour
+    public class PathFinder : MonoBehaviour
     {
-        static WaypointManager _instance;
-        public static WaypointManager instance { get { return _instance; } }
+        static PathFinder _instance;
+        public static PathFinder instance { get { return _instance; } }
 
         public GraphData graphData = new GraphData();
         

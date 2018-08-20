@@ -5,9 +5,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Mr1
+namespace QPathFinder
 {
-    public static class PathFinderUtility 
+    public static class PathFollowerUtility 
     {
 		public enum SearchMode 
 		{
@@ -17,7 +17,7 @@ namespace Mr1
 		}
 		/* PUBLIC */
 
-		public static void FindShortestPathBetweenNodesAsynchronous (  this WaypointManager manager, int startNodeID, int endNodeID, PathLineType pathType, System.Action<List<Vector3>> OnPathFound )
+		public static void FindShortestPathBetweenNodesAsynchronous (  this PathFinder manager, int startNodeID, int endNodeID, PathLineType pathType, System.Action<List<Vector3>> OnPathFound )
 		{
 			int nearestPointFromStart = startNodeID;
 			int nearestPointFromEnd = endNodeID;
@@ -72,7 +72,7 @@ namespace Mr1
                 } );
 		}
 
-		public static void FindShortestPathBetweenPointsAsynchronous (  this WaypointManager manager, Vector3 startPoint, Vector3 endPoint, PathLineType pathType, SearchMode searchMode,  System.Action<List<Vector3>> OnPathFound )
+		public static void FindShortestPathBetweenPointsAsynchronous (  this PathFinder manager, Vector3 startPoint, Vector3 endPoint, PathLineType pathType, SearchMode searchMode,  System.Action<List<Vector3>> OnPathFound )
 		{
 			bool makeItMoreAccurate = searchMode == SearchMode.Intermediate || searchMode == SearchMode.Complex;
 			int nearestPointFromStart = manager.FindNearestNode ( startPoint );
@@ -282,7 +282,7 @@ namespace Mr1
 
             return pt;
         }
-		private static Vector3 GetClosestPointOnAnyPath ( int nodeID , WaypointManager manager, Vector3 pos )
+		private static Vector3 GetClosestPointOnAnyPath ( int nodeID , PathFinder manager, Vector3 pos )
 		{
 			Node node = manager.graphData.GetNode ( nodeID );
 			Vector3 vClosestPoint = node.position;

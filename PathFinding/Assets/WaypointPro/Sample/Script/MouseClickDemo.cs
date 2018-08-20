@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Mr1
+namespace QPathFinder
 {
     public class MouseClickDemo : MonoBehaviour
     {
@@ -25,7 +25,7 @@ namespace Mr1
         }
         void OnMouseUp()
         {
-            LayerMask backgroundLayerMask = 1 << WaypointManager.instance.gameObject.layer;
+            LayerMask backgroundLayerMask = 1 << PathFinder.instance.gameObject.layer;
 
             Ray ray = camera.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
@@ -43,15 +43,15 @@ namespace Mr1
 
             //WaypointManager.instance.selected.Refresh();
             {
-                WaypointManager.instance.FindShortestPathBetweenPointsAsynchronous( playerObj.transform.position, hitPos,  WaypointManager.instance.graphData.lineType, 
-                    thoroughPathFinding ? PathFinderUtility.SearchMode.Complex: PathFinderUtility.SearchMode.Simple,
+                PathFinder.instance.FindShortestPathBetweenPointsAsynchronous( playerObj.transform.position, hitPos,  PathFinder.instance.graphData.lineType, 
+                    thoroughPathFinding ? PathFollowerUtility.SearchMode.Complex: PathFollowerUtility.SearchMode.Simple,
                 
                     delegate ( List<Vector3> wayPoints ) 
                     { 
                         if ( useGroundSnap )
-                           PathFinderUtility.FollowPathWithGroundSnap ( playerObj.transform, wayPoints, playerSpeed, Vector3.down, 5, 0.1f, 200, LayerMask.NameToLayer("Default"));
+                           PathFollowerUtility.FollowPathWithGroundSnap ( playerObj.transform, wayPoints, playerSpeed, Vector3.down, 5, 0.1f, 200, LayerMask.NameToLayer("Default"));
                         else 
-                            PathFinderUtility.FollowPath ( playerObj.transform, wayPoints, playerSpeed );
+                            PathFollowerUtility.FollowPath ( playerObj.transform, wayPoints, playerSpeed );
 
                     }
                  );
