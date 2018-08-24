@@ -6,7 +6,7 @@ using UnityEngine;
 namespace QPathFinder
 {
     
-    public class PathFollowerYSnap : PathFollower
+    public class PathFollowerSnapToGround : PathFollower
     {
         Vector3 directionOfRayCast;
         float offsetDistanceFromPoint;
@@ -33,7 +33,7 @@ namespace QPathFinder
                 return hitPos + offsetDistanceToFloatFromGround * (-directionOfRayCast);
             }
 
-            Debug.LogError(" ground not found at " + point);
+            if ( QPathFinder.Logger.CanLogError ) QPathFinder.Logger.LogError("Ground not found at " + point + ". Could not snap to ground properly!");
             return point;
             
         }

@@ -5,10 +5,8 @@ using UnityEngine;
 
 namespace QPathFinder
 {
-   
     public class PathFollower : MonoBehaviour
     {
-        public bool logMessage;
 		protected List<Vector3> pointsToFollow;
 
         public float moveSpeed = 10f;
@@ -17,9 +15,7 @@ namespace QPathFinder
         public Transform _transform { get; set; }
         
 		protected int _currentIndex;
-
         
-
         public void Follow(List<Vector3> pointsToFollow, float moveSpeed)
         {
             this.pointsToFollow = pointsToFollow;
@@ -28,15 +24,16 @@ namespace QPathFinder
             StopFollowing();
 
             _currentIndex = 0;
+
             StartCoroutine(FollowPath());
         }
 
-        public void StopFollowing() { StopCoroutine("FollowPath");  }
+        public void StopFollowing() { StopAllCoroutines(); }
         
         IEnumerator FollowPath()
         {
             yield return null;
-            if (logMessage) Debug.Log(string.Format("[{0}] Follow(), Speed:{1}", name, moveSpeed));
+            if ( QPathFinder.Logger.CanLogInfo ) QPathFinder.Logger.LogInfo(string.Format("[{0}] Follow(), Speed:{1}", name, moveSpeed));
 
             while (true)
             {
@@ -53,8 +50,9 @@ namespace QPathFinder
                 }
                 yield return null;
             }
-        }
 
+            if ( QPathFinder.Logger.CanLogInfo ) QPathFinder.Logger.LogInfo ("PathFollower completed!");
+        }
 
         void MoveTo(int pointIndex)
         {
@@ -69,6 +67,7 @@ namespace QPathFinder
         }
 
         protected virtual bool IsOnPoint(int pointIndex) { return (_transform.position - pointsToFollow[pointIndex]).sqrMagnitude < 0.1f; }
+
         bool IsEndPoint(int pointIndex)
         {
             return pointIndex == EndIndex();
@@ -97,16 +96,6 @@ namespace QPathFinder
       
             return nextIndex;
         }
-
-
-
-
-
-
-
-
-
-
 
     }
 }

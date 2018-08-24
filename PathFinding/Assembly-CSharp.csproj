@@ -51,12 +51,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\QPathFinder\Sample\Script\MouseClickDemo.cs" />
-     <Compile Include="Assets\QPathFinder\Sample\Script\PathFollower.cs" />
-     <Compile Include="Assets\QPathFinder\Sample\Script\PathFollowerUtility.cs" />
-     <Compile Include="Assets\QPathFinder\Sample\Script\PathFollowerYSnap.cs" />
+     <Compile Include="Assets\QPathFinder\Sample\Scripts\MouseClickDemo.cs" />
+     <Compile Include="Assets\QPathFinder\Script\Followers\PathFollower.cs" />
+     <Compile Include="Assets\QPathFinder\Script\Followers\PathFollowerSnapToGround.cs" />
+     <Compile Include="Assets\QPathFinder\Script\Followers\PathFollowerUtility.cs" />
      <Compile Include="Assets\QPathFinder\Script\GraphData.cs" />
      <Compile Include="Assets\QPathFinder\Script\PathFinder.cs" />
+     <Compile Include="Assets\QPathFinder\Script\Utils.cs" />
  <Reference Include="UnityEditor.StandardEvents">
  <HintPath>/Users/vijay.veluri/Git/PathFinding-WayPoint/PathFinding/Library/ScriptAssemblies/UnityEditor.StandardEvents.dll</HintPath>
  </Reference>

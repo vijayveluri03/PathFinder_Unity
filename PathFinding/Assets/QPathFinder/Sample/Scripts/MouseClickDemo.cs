@@ -9,12 +9,19 @@ namespace QPathFinder
         public string pathName;
         public Camera camera;
         public float playerSpeed = 20.0f;
+        public float playerFloatOffset;
+        public float raycastOriginOffset;
+
         public bool thoroughPathFinding = false;
         public bool useGroundSnap = false;
 
         public GameObject playerObj;
 
 
+        void Awake()
+        {
+            QPathFinder.Logger.SetLoggingLevel( QPathFinder.Logger.Level.Warnings );
+        }
         void Update () 
         {
             if ( Input.GetMouseButtonUp(0))
@@ -44,12 +51,16 @@ namespace QPathFinder
             //WaypointManager.instance.selected.Refresh();
             {
                 PathFinder.instance.FindShortestPathBetweenPointsAsynchronous( playerObj.transform.position, hitPos,  PathFinder.instance.graphData.lineType, 
-                    thoroughPathFinding ? PathFollowerUtility.SearchMode.Complex: PathFollowerUtility.SearchMode.Simple,
+                    thoroughPathFinding ? SearchMode.Complex: SearchMode.Simple,
                 
                     delegate ( List<Vector3> wayPoints ) 
                     { 
                         if ( useGroundSnap )
-                           PathFollowerUtility.FollowPathWithGroundSnap ( playerObj.transform, wayPoints, playerSpeed, Vector3.down, 5, 0.1f, 200, LayerMask.NameToLayer("Default"));
+                        {
+                           PathFollowerUtility.FollowPathWithGroundSnap ( playerObj.transform, 
+                                                                            wayPoints, playerSpeed, Vector3.down, playerFloatOffset, LayerMask.NameToLayer("Default"),
+                                                                            raycastOriginOffset, 40 );
+                        }
                         else 
                             PathFollowerUtility.FollowPath ( playerObj.transform, wayPoints, playerSpeed );
 
