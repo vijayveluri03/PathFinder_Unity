@@ -106,7 +106,7 @@ namespace QPathFinder
 
 			float startTime = Time.realtimeSinceStartup;
             
-			manager.FindShortestPathAsynchronous( nearestPointFromStart, nearestPointFromEnd, 
+			manager.FindShortestPathBetweenNodesAsynchronous( nearestPointFromStart, nearestPointFromEnd, 
 				delegate ( List<Node> wayPoints ) 
                 { 
 					if ( wayPoints == null || wayPoints.Count == 0 )
@@ -154,7 +154,7 @@ namespace QPathFinder
 
 			float startTime = Time.realtimeSinceStartup;
             
-			manager.FindShortestPathAsynchronous( nearestPointFromStart, nearestPointFromEnd, 
+			manager.FindShortestPathBetweenNodesAsynchronous( nearestPointFromStart, nearestPointFromEnd, 
 				delegate ( List<Node> wayPoints ) 
                 { 
 					if ( wayPoints == null || wayPoints.Count == 0 )
@@ -243,7 +243,7 @@ namespace QPathFinder
 
 			float startTime = Time.realtimeSinceStartup;
             
-			List<Node> wayPoints = manager.FindShortestPathSynchronous( nearestPointFromStart, nearestPointFromEnd ) ;
+			List<Node> wayPoints = manager.FindShortestPathBetweenNodesSynchronous( nearestPointFromStart, nearestPointFromEnd ) ;
 				
 			{ 
 				if ( wayPoints == null || wayPoints.Count == 0 )
