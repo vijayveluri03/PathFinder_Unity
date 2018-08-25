@@ -11,6 +11,7 @@ namespace QPathFinder
         public float playerSpeed = 20.0f;
         public float playerFloatOffset;
         public float raycastOriginOffset;
+        public string colliderLayer = "Default";
 
         public bool thoroughPathFinding = false;
         public bool useGroundSnap = false;
@@ -58,7 +59,7 @@ namespace QPathFinder
                         if ( useGroundSnap )
                         {
                            PathFollowerUtility.FollowPathWithGroundSnap ( playerObj.transform, 
-                                                                            wayPoints, playerSpeed, Vector3.down, playerFloatOffset, LayerMask.NameToLayer("Default"),
+                                                                            wayPoints, playerSpeed, Vector3.down, playerFloatOffset, LayerMask.NameToLayer( colliderLayer ),
                                                                             raycastOriginOffset, 40 );
                         }
                         else 

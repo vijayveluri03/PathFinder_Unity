@@ -44,9 +44,7 @@ namespace QPathFinder
         [SerializeField] public int IDOfA = -1;
         [SerializeField] public int IDOfB = -1;
 
-#if ONE_WAY_LOGIC
         public bool isOneWay = false;       
-#endif
     }
 
     //
@@ -59,6 +57,7 @@ namespace QPathFinder
         [SerializeField] public Color lineColor = Color.yellow;
         [SerializeField] public float nodeSize = 0.5f;
         [SerializeField] public float heightFromTheGround = 0;      // this represents how much offset we create our points from the ground ?
+        [SerializeField] public string colliderLayer = "Default";
 
         [SerializeField] public List<Node> nodes;
         [SerializeField] public List<Path> paths;
