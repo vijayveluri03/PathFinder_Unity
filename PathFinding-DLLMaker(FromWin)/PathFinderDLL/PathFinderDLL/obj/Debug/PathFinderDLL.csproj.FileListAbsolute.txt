@@ -1,0 +1,8 @@
+C:\Users\vijay.veluri\TestProjects\PathFinding-DLLMaker\PathFinderDLL\PathFinderDLL\obj\Debug\PathFinderDLL.csprojResolveAssemblyReference.cache
+C:\Users\vijay.veluri\TestProjects\PathFinding-DLLMaker\PathFinderDLL\PathFinderDLL\obj\Debug\PathFinderDLL.csproj.CoreCompileInputs.cache
+C:\Users\vijay.veluri\TestProjects\PathFinding-DLLMaker\PathFinderDLL\PathFinderDLL\bin\Debug\PathFinderDLL.dll
+C:\Users\vijay.veluri\TestProjects\PathFinding-DLLMaker\PathFinderDLL\PathFinderDLL\bin\Debug\PathFinderDLL.pdb
+C:\Users\vijay.veluri\TestProjects\PathFinding-DLLMaker\PathFinderDLL\PathFinderDLL\bin\Debug\UnityEngine.dll
+C:\Users\vijay.veluri\TestProjects\PathFinding-DLLMaker\PathFinderDLL\PathFinderDLL\obj\Debug\PathFinderDLL.dll
+C:\Users\vijay.veluri\TestProjects\PathFinding-DLLMaker\PathFinderDLL\PathFinderDLL\obj\Debug\PathFinderDLL.pdb
+C:\Users\vijay.veluri\TestProjects\PathFinding-DLLMaker\PathFinderDLL\PathFinderDLL\bin\Debug\UnityEngine.xml
