@@ -11,41 +11,59 @@ namespace QPathFinder
 		Complex
 	}
 	
-	public static class PathFinderExtensions 
+	public static class PathFinderExtensions
 	{
-		//
-		// Finds the shortest path between **Nodes** asynchronously 
+		/// <Summary> 
+        /// Finds shortest path between Nodes.
+        /// Once the path if found, it will return the path as List of Positions ( not Nodes, If you need Nodes, use FindShortestPathOfNodes ). 
+        /// </Summary>
+        /// <returns> Returns list of **Positions**</returns>
+        /// <param name="startNodeID">Find the path from this node</param>
+        /// <param name="endNodeID">Find the path to this node</param>
+		/// <param name="pathType">Path type. It can be a straight line or curved path</param>
+        /// <param name="executionType">Synchronous is immediate. This method locks the control till path is found and returns the path. 
+        /// Asynchronous type runs in coroutines with out locking the control. If you have more than 50 Nodes, Asynchronous is recommended</param>
+        /// <param name="OnPathFound">Callback once the path is found</param>
 
-		public static void FindShortestPathBetweenNodesAsynchronous (  this PathFinder manager, int startNodeID, int endNodeID, PathLineType pathType, System.Action<List<Vector3>> OnPathFound )
+
+		public static void FindShortestPathOfPoints (  this PathFinder manager, int startNodeID, int endNodeID, PathLineType pathType, Execution executionType, System.Action<List<Vector3>> OnPathFound )
 		{
-			PathFollowerUtility.FindShortestPathBetweenNodesAsynchronous( manager, startNodeID, endNodeID, pathType, OnPathFound );
+			PathFollowerUtility.FindShortestPathOfPoints_Internal( manager, startNodeID, endNodeID, pathType, executionType, OnPathFound );
 		}
 
-		// 
-		// Finds the shortest path between **Points** asynchronously
+		
+		/// <Summary> 
+        /// Finds shortest path between Nodes.
+        /// Once the path if found, it will return the path as List of Positions ( not Nodes, If you need Nodes, use FindShortestPathOfNodes ). 
+        /// </Summary>
+        /// <returns> Returns list of **Positions**</returns>
+        /// <param name="startNodeID">Find the path from this node</param>
+        /// <param name="endNodeID">Find the path to this node</param>
+		/// <param name="pathType">Path type. It can be a straight line or curved path</param>
+        /// <param name="executionType">Synchronous is immediate. This method locks the control till path is found and returns the path. 
+        /// Asynchronous type runs in coroutines with out locking the control. If you have more than 50 Nodes, Asynchronous is recommended</param>
+		/// <param name="searchMode"> This is still WIP. For now, Intermediate and Complex does a tad bit more calculations to make the path shorter</param>
+        /// <param name="OnPathFound">Callback once the path is found</param>
 
-		public static void FindShortestPathBetweenPointsAsynchronous (  this PathFinder manager, Vector3 startPoint, Vector3 endPoint, PathLineType pathType, SearchMode searchMode,  System.Action<List<Vector3>> OnPathFound )
+
+		public static void FindShortestPathOfPoints ( this PathFinder manager, Vector3 startPoint, Vector3 endPoint, PathLineType pathType, Execution executionType, SearchMode searchMode,  System.Action<List<Vector3>> OnPathFound )
 		{
-			PathFollowerUtility.FindShortestPathBetweenPointsAsynchronous ( manager, startPoint, endPoint, pathType, searchMode, OnPathFound);
-		}
-
-		//
-		// Finds the shortest path between **Points** Immediately
-
-		public static List<Vector3> FindShortestPathBetweenPointsSynchronous ( this PathFinder manager, Vector3 startPoint, Vector3 endPoint, PathLineType pathType, SearchMode searchMode  )
-		{
-			return PathFollowerUtility.FindShortestPathBetweenPointsSynchronous (  manager, startPoint, endPoint, pathType, searchMode  );
+			PathFollowerUtility.FindShortestPathOfPoints_Internal ( manager, startPoint, endPoint, pathType, executionType, searchMode, OnPathFound);
 		}
 	}
 
     public static class PathFollowerUtility 
     {
-		//
-		//	This will move the game object through the points specified
+		/// <Summary>
+		///	This will move the game object through the points specified.
+		/// </Summary>
+		/// <param name="transform">The object you want to move along the path</param>
+		/// <param name="points">List of positions along which the object is moved.</param>
+		/// <param name="moveSpeed">Movement speed</param>
 
-		public static PathFollower FollowPath( Transform transform, List<Vector3> points, float moveSpeed, PathLineType pathType = PathLineType.Straight )
+		public static PathFollower FollowPath( Transform transform, List<Vector3> points, float moveSpeed )
 		{
-			if ( QPathFinder.Logger.CanLogInfo ) QPathFinder.Logger.LogInfo("Initiated Follow path for transform " + transform.name +" with path type:" + pathType, true );
+			if ( QPathFinder.Logger.CanLogInfo ) QPathFinder.Logger.LogInfo("Initiated Follow path for transform " + transform.name, true );
 			var pathFollower = CreateOrGet(transform);
 			if (points != null) 
 				pathFollower.Follow(points, moveSpeed);
@@ -56,19 +74,29 @@ namespace QPathFinder
 			return pathFollower;
 		}
 
-		//
-		// This will movee ethe game object through the points specified, Also, it will keep the gameobject snapped to the ground
-		// So if your Nodes are a little above the ground, your target will still move on the ground
+		/// <Summary>
+		/// This will move the game object through the points specified, Also, it will keep the gameobject snapped to the ground.
+		/// So if your Nodes are a little above the ground, your target will still move on the ground.
+		/// We are doing this by raycasting from above the player to the ground. At the ray cast hit position, we are snapping the player.
+		/// </Summary>
+		/// <param name="transform">The object you want to move along the path</param>
+		/// <param name="points">List of positions along which the object is moved.</param>
+		/// <param name="moveSpeed">Movement speed</param>
+		/// <param name="directionOfRayCast"> We use raycasting to find the ground position. If your ground is down, the ray has to go down, so use Vector3.down. </param>
+		/// <param name="offsetDistanceToFloatFromGround"> If you want your character to float a little above the ground, give the offset value here </param>
+		/// <param name="groundGameObjectLayer">This is the ground Gameobject's layer. When we use raycast we target to hit this layer</param>
+		/// <param name="offsetDistanceFromPoint">this is to calculate the raycast origin, from where we shoot rays. raycast origin is generally above the player, casting rays towards ground. For most cases, you can leave this as default.</param>
+		/// <param name="maxDistanceForRayCast">this is the distance of ray from the raycast origin. For most cases you can let this be default value. </param>
 
 		public static PathFollower FollowPathWithGroundSnap( Transform transform, List<Vector3> points, float moveSpeed
-																, Vector3 directionOfRayCast			// if your ground is down, the ray cast has to be down too, so its Vector3.down
-																, float offsetDistanceToFloatFromGround // the character offset distance from the ground 
-																, int groundGameObjectLayer				// this is the ground Gameobject layer
-																, float offsetDistanceFromPoint = 10	// this is to calculate the raycast origin, from where we shoot rays. raycast origin is generally above the player casting rays towards ground. how high do u want the origin depends on your scene.
-																, int maxDistanceForRayCast = 40		// this is the distance of ray from the raycast origin. 
-																, PathLineType pathType = PathLineType.Straight )
+																, Vector3 directionOfRayCast			
+																, float offsetDistanceToFloatFromGround 
+																, int groundGameObjectLayer				
+																, float offsetDistanceFromPoint = 10	
+																, int maxDistanceForRayCast = 40		
+																 )
 		{
-			if ( QPathFinder.Logger.CanLogInfo ) QPathFinder.Logger.LogInfo("Initiated Follow path[With ground snap] for transform " + transform.name +" with path type:" + pathType, true );
+			if ( QPathFinder.Logger.CanLogInfo ) QPathFinder.Logger.LogInfo("Initiated Follow path[With ground snap] for transform " + transform.name , true );
 			var pathFollower = CreateWithSnapToGround(transform, directionOfRayCast, offsetDistanceFromPoint, offsetDistanceToFloatFromGround, maxDistanceForRayCast, groundGameObjectLayer );
 			if (points != null) 
 				pathFollower.Follow(points, moveSpeed);
@@ -79,8 +107,11 @@ namespace QPathFinder
 			return pathFollower;
 		}
 
-		
-		public static void StopFollowing( Transform transform)
+		/// <summary>
+		/// Stops the gameobject while moving along the path. 
+		/// </summary>
+		/// <param name="transform">The gameobject which needs to stop moving</param>
+		public static void StopFollowing( Transform transform )
 		{
 			if ( QPathFinder.Logger.CanLogInfo ) QPathFinder.Logger.LogInfo("Stopping FollowPath");
 			Stop(transform);
@@ -91,7 +122,7 @@ namespace QPathFinder
 
 		#region PRIVATE AND INTERNAL
 
-		internal static void FindShortestPathBetweenNodesAsynchronous (  PathFinder manager, int startNodeID, int endNodeID, PathLineType pathType, System.Action<List<Vector3>> OnPathFound )
+		internal static void FindShortestPathOfPoints_Internal (  PathFinder manager, int startNodeID, int endNodeID, PathLineType pathType, Execution execution, System.Action<List<Vector3>> OnPathFound )
 		{
 			int nearestPointFromStart = startNodeID;
 			int nearestPointFromEnd = endNodeID;
@@ -105,36 +136,37 @@ namespace QPathFinder
 			}
 
 			float startTime = Time.realtimeSinceStartup;
+
+			System.Action<List<Node>> onPathOfNodesFound = delegate ( List<Node> nodes ) 
+			{ 
+				if ( nodes == null || nodes.Count == 0 )
+					OnPathFound ( null );
+
+				List<System.Object> allNodes = new List<System.Object>();
+				List<Vector3> path = null;
+
+				if ( nodes != null )
+				{
+					foreach ( var a in nodes ) 
+					{
+						allNodes.Add ( a.Position );
+					}
+				}
+				path = (pathType == PathLineType.Straight ? GetStraightPathPoints(allNodes) : GetCatmullRomCurvePathPoints ( allNodes ) );
+
+				if ( QPathFinder.Logger.CanLogInfo )
+					for ( int i = 1; i < path.Count; i++ )
+					{
+						Debug.DrawLine(path[i - 1], path[i], Color.red, 10f);
+					}
+
+				OnPathFound ( path );
+			};
             
-			manager.FindShortestPathBetweenNodesAsynchronous( nearestPointFromStart, nearestPointFromEnd, 
-				delegate ( List<Node> wayPoints ) 
-                { 
-					if ( wayPoints == null || wayPoints.Count == 0 )
-						OnPathFound ( null );
-
-					List<System.Object> allWayPoints	= new List<System.Object>();
-					List<Vector3> path = null;
-
-                    if ( wayPoints != null )
-                    {
-                        foreach ( var a in wayPoints ) 
-                        {
-							allWayPoints.Add ( a.Position );
-                        }
-                    }
-					path = (pathType == PathLineType.Straight ? GetStraightPathPoints(allWayPoints) : GetCatmullRomCurvePathPoints ( allWayPoints ) );
-
-					if ( QPathFinder.Logger.CanLogInfo )
-						for ( int i = 1; i < path.Count; i++ )
-						{
-							Debug.DrawLine(path[i - 1], path[i], Color.red, 10f);
-						}
-
-					OnPathFound ( path );
-                } );
+			manager.FindShortestPathOfNodes( nearestPointFromStart, nearestPointFromEnd, execution, onPathOfNodesFound );
 		}
 
-		internal static void FindShortestPathBetweenPointsAsynchronous (  PathFinder manager, Vector3 startPoint, Vector3 endPoint, PathLineType pathType, SearchMode searchMode,  System.Action<List<Vector3>> OnPathFound )
+		internal static void FindShortestPathOfPoints_Internal (  PathFinder manager, Vector3 startPoint, Vector3 endPoint, PathLineType pathType, Execution execution, SearchMode searchMode,  System.Action<List<Vector3>> OnPathFound )
 		{
 			bool makeItMoreAccurate = searchMode == SearchMode.Intermediate || searchMode == SearchMode.Complex;
 			int nearestPointFromStart = manager.FindNearestNode ( startPoint );
@@ -153,108 +185,22 @@ namespace QPathFinder
 			}
 
 			float startTime = Time.realtimeSinceStartup;
-            
-			manager.FindShortestPathBetweenNodesAsynchronous( nearestPointFromStart, nearestPointFromEnd, 
-				delegate ( List<Node> wayPoints ) 
-                { 
-					if ( wayPoints == null || wayPoints.Count == 0 )
-					{
-						OnPathFound ( null );
-						return;
-					}
-
-					List<System.Object> allWayPoints	= new List<System.Object>();
-                    if ( wayPoints != null )
-                    {
-                        foreach ( var a in wayPoints ) 
-                        {
-							allWayPoints.Add ( a );
-                        }
-                    }
-
-					if ( QPathFinder.Logger.CanLogInfo ) QPathFinder.Logger.LogInfo("Search Mode " + searchMode.ToString() + " opted", true );
-
-					if ( makeItMoreAccurate )
-					{
-						if ( allWayPoints.Count > 1 ) 
-						{
-							bool tryOtherLines = false;
-							int id = ((Node) allWayPoints[0]).autoGeneratedID;
-
-							allWayPoints[0] = ComputeClosestPointFromPointToLine( startPoint, GetPositionFromNodeOrVector( allWayPoints, 0 ), GetPositionFromNodeOrVector( allWayPoints, 1 ), out tryOtherLines );
-
-							if ( tryOtherLines ) 
-							{
-								allWayPoints.Insert(0, GetClosestPointOnAnyPath( id, manager, startPoint ) );
-							}
-
-							tryOtherLines = false;
-							id = ((Node) allWayPoints[allWayPoints.Count - 1]).autoGeneratedID;
-							allWayPoints[allWayPoints.Count - 1] = ComputeClosestPointFromPointToLine( endPoint, GetPositionFromNodeOrVector( allWayPoints, allWayPoints.Count - 2), GetPositionFromNodeOrVector( allWayPoints, allWayPoints.Count - 1), out tryOtherLines );
-
-							if ( tryOtherLines ) 
-							{
-								allWayPoints.Add( GetClosestPointOnAnyPath( id, manager, endPoint ) );
-							}
-						}
-						else
-						{
-							if ( QPathFinder.Logger.CanLogWarning ) QPathFinder.Logger.LogWarning("Unable to get the best result due to less node count", true ); 
-						}
-					}
-
-					List<Vector3> path = null;
-					
-					{
-						allWayPoints.Insert ( 0, startPoint );
-						allWayPoints.Add ( endPoint );
-
-						path = (pathType == PathLineType.Straight ? GetStraightPathPoints(allWayPoints) : GetCatmullRomCurvePathPoints ( allWayPoints ) );
-					}
-					
-					if ( QPathFinder.Logger.CanLogInfo )
-					{
-						for ( int i = 1; i < path.Count; i++ )
-						{
-							Debug.DrawLine(path[i - 1], path[i], Color.red, 10f);
-						}
-					}
-
-					OnPathFound ( path );
-                } );
-		}
-		internal static List<Vector3> FindShortestPathBetweenPointsSynchronous (  PathFinder manager, Vector3 startPoint, Vector3 endPoint, PathLineType pathType, SearchMode searchMode  )
-		{
-			bool makeItMoreAccurate = searchMode == SearchMode.Intermediate || searchMode == SearchMode.Complex;
-			int nearestPointFromStart = manager.FindNearestNode ( startPoint );
-			int nearestPointFromEnd = -1;
-			if ( nearestPointFromStart != -1 )
-				nearestPointFromEnd = manager.FindNearestNode ( endPoint );
-
-			if ( QPathFinder.Logger.CanLogInfo ) QPathFinder.Logger.LogInfo("Nearest point from start" + startPoint + " is " + nearestPointFromStart, true );
-			if ( QPathFinder.Logger.CanLogInfo ) QPathFinder.Logger.LogInfo("Nearest point from end:" + endPoint + " is " + nearestPointFromEnd, true );
 
 
-			if ( nearestPointFromEnd == -1 || nearestPointFromStart == -1 )
-			{
-				if ( QPathFinder.Logger.CanLogError ) QPathFinder.Logger.LogError("Could not find path between " + nearestPointFromStart + " and " + nearestPointFromEnd, true );
-				return null;
-			}
-
-			float startTime = Time.realtimeSinceStartup;
-            
-			List<Node> wayPoints = manager.FindShortestPathBetweenNodesSynchronous( nearestPointFromStart, nearestPointFromEnd ) ;
-				
+			System.Action<List<Node>> onPathOfNodesFound = delegate ( List<Node> nodes ) 
 			{ 
-				if ( wayPoints == null || wayPoints.Count == 0 )
-					return null;
-
-				List<System.Object> allWayPoints	= new List<System.Object>();
-				if ( wayPoints != null )
+				if ( nodes == null || nodes.Count == 0 )
 				{
-					foreach ( var a in wayPoints ) 
+					OnPathFound ( null );
+					return;
+				}
+
+				List<System.Object> allNodes	= new List<System.Object>();
+				if ( nodes != null )
+				{
+					foreach ( var a in nodes ) 
 					{
-						allWayPoints.Add ( a );
+						allNodes.Add ( a );
 					}
 				}
 
@@ -262,28 +208,28 @@ namespace QPathFinder
 
 				if ( makeItMoreAccurate )
 				{
-					if ( allWayPoints.Count > 1 ) 
+					if ( allNodes.Count > 1 ) 
 					{
 						bool tryOtherLines = false;
-						int id = ((Node) allWayPoints[0]).autoGeneratedID;
+						int id = ((Node) allNodes[0]).autoGeneratedID;
 
-						allWayPoints[0] = ComputeClosestPointFromPointToLine( startPoint, GetPositionFromNodeOrVector( allWayPoints, 0 ), GetPositionFromNodeOrVector( allWayPoints, 1 ), out tryOtherLines );
+						allNodes[0] = ComputeClosestPointFromPointToLine( startPoint, GetPositionFromNodeOrVector( allNodes, 0 ), GetPositionFromNodeOrVector( allNodes, 1 ), out tryOtherLines );
 
 						if ( tryOtherLines ) 
 						{
-							allWayPoints.Insert(0, GetClosestPointOnAnyPath( id, manager, startPoint ) );
+							allNodes.Insert(0, GetClosestPointOnAnyPath( id, manager, startPoint ) );
 						}
 
 						tryOtherLines = false;
-						id = ((Node) allWayPoints[allWayPoints.Count - 1]).autoGeneratedID;
-						allWayPoints[allWayPoints.Count - 1] = ComputeClosestPointFromPointToLine( endPoint, GetPositionFromNodeOrVector( allWayPoints, allWayPoints.Count - 2), GetPositionFromNodeOrVector( allWayPoints, allWayPoints.Count - 1), out tryOtherLines );
+						id = ((Node) allNodes[allNodes.Count - 1]).autoGeneratedID;
+						allNodes[allNodes.Count - 1] = ComputeClosestPointFromPointToLine( endPoint, GetPositionFromNodeOrVector( allNodes, allNodes.Count - 2), GetPositionFromNodeOrVector( allNodes, allNodes.Count - 1), out tryOtherLines );
 
 						if ( tryOtherLines ) 
 						{
-							allWayPoints.Add( GetClosestPointOnAnyPath( id, manager, endPoint ) );
+							allNodes.Add( GetClosestPointOnAnyPath( id, manager, endPoint ) );
 						}
 					}
-					else 
+					else
 					{
 						if ( QPathFinder.Logger.CanLogWarning ) QPathFinder.Logger.LogWarning("Unable to get the best result due to less node count", true ); 
 					}
@@ -292,12 +238,12 @@ namespace QPathFinder
 				List<Vector3> path = null;
 				
 				{
-					allWayPoints.Insert ( 0, startPoint );
-					allWayPoints.Add ( endPoint );
+					allNodes.Insert ( 0, startPoint );
+					allNodes.Add ( endPoint );
 
-					path = (pathType == PathLineType.Straight ? GetStraightPathPoints(allWayPoints) : GetCatmullRomCurvePathPoints ( allWayPoints ) );
+					path = (pathType == PathLineType.Straight ? GetStraightPathPoints(allNodes) : GetCatmullRomCurvePathPoints ( allNodes ) );
 				}
-
+				
 				if ( QPathFinder.Logger.CanLogInfo )
 				{
 					for ( int i = 1; i < path.Count; i++ )
@@ -306,9 +252,12 @@ namespace QPathFinder
 					}
 				}
 
-				return ( path );
-			}
+				OnPathFound ( path );
+			};
+            
+			manager.FindShortestPathOfNodes ( nearestPointFromStart, nearestPointFromEnd, execution, onPathOfNodesFound );
 		}
+
 
 		internal static List<Vector3> GetStraightPathPoints( List<System.Object> nodePoints )
         {
@@ -413,7 +362,7 @@ namespace QPathFinder
 			var pathFollower = transform.GetComponent<PathFollower>();
 			if (pathFollower != null) 
 			{ 
-				pathFollower.StopFollowing(); GameObject.Destroy(pathFollower); 
+				pathFollower.StopFollowing(); GameObject.DestroyImmediate(pathFollower); 
 				if ( QPathFinder.Logger.CanLogInfo ) QPathFinder.Logger.LogInfo ("PathFollower stopped and its Script is destroyed!");
 			}
 		}

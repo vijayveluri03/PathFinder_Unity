@@ -6,32 +6,34 @@ namespace QPathFinder
 {
     public class MouseClickDemo : MonoBehaviour
     {
-        public string pathName;
-        public Camera camera;
+        public Camera camera;   // Needed for mouse click to world position convertion. 
         public float playerSpeed = 20.0f;
-        public float playerFloatOffset;
-        public float raycastOriginOffset;
-        public string colliderLayer = "Default";
+                public GameObject playerObj;
 
-        public bool thoroughPathFinding = false;
-        public bool useGroundSnap = false;
 
-        public GameObject playerObj;
+        // For PathFollowerWithGroundSnap - This will snap the player to the ground while it follows the path. 
+        public float playerFloatOffset;     // This is how high the player floats above the ground. 
+        public float raycastOriginOffset;   // This is how high above the player u want to raycast to ground. 
+        public string colliderLayer = "Default";    // the ground layout for the ray to hit. 
+        public bool thoroughPathFinding = false;    // uses few extra steps in pathfinding to find accurate result. 
 
+
+        public bool useGroundSnap = false;          // if snap to ground is not used, player goes only through nodes and doesnt project itself on the ground. 
 
         void Awake()
         {
-            QPathFinder.Logger.SetLoggingLevel( QPathFinder.Logger.Level.Warnings );
+            QPathFinder.Logger.SetLoggingLevel( QPathFinder.Logger.Level.Info );
         }
         void Update () 
         {
-            if ( Input.GetMouseButtonUp(0))
+            if ( Input.GetMouseButtonUp(0)) 
             {
-                OnMouseUp();
+                MovePlayerToMousePosition();
             }
 
         }
-        void OnMouseUp()
+
+        void MovePlayerToMousePosition()
         {
             LayerMask backgroundLayerMask = 1 << PathFinder.instance.gameObject.layer;
 
@@ -48,30 +50,35 @@ namespace QPathFinder
                 return;
             }
 
-
-            //WaypointManager.instance.selected.Refresh();
             {
-                PathFinder.instance.FindShortestPathBetweenPointsAsynchronous( playerObj.transform.position, hitPos,  PathFinder.instance.graphData.lineType, 
+                PathFinder.instance.FindShortestPathOfPoints( playerObj.transform.position, hitPos,  PathFinder.instance.graphData.lineType, 
+                    Execution.Asynchronously,
                     thoroughPathFinding ? SearchMode.Complex: SearchMode.Simple,
-                
-                    delegate ( List<Vector3> wayPoints ) 
+                    delegate ( List<Vector3> points ) 
                     { 
+                        PathFollowerUtility.StopFollowing( playerObj.transform );
                         if ( useGroundSnap )
                         {
-                           PathFollowerUtility.FollowPathWithGroundSnap ( playerObj.transform, 
-                                                                            wayPoints, playerSpeed, Vector3.down, playerFloatOffset, LayerMask.NameToLayer( colliderLayer ),
-                                                                            raycastOriginOffset, 40 );
+                           FollowThePathWithGroundSnap ( points );
                         }
                         else 
-                            PathFollowerUtility.FollowPath ( playerObj.transform, wayPoints, playerSpeed );
+                            FollowThePathNormally ( points );
 
                     }
                  );
             }
         }
 
-        
+        void FollowThePathWithGroundSnap ( List<Vector3> nodes )
+        {
+            PathFollowerUtility.FollowPathWithGroundSnap ( playerObj.transform, 
+                                                        nodes, playerSpeed, Vector3.down, playerFloatOffset, LayerMask.NameToLayer( colliderLayer ),
+                                                        raycastOriginOffset, 40 );
+        }
 
-        
+        void FollowThePathNormally ( List<Vector3> nodes )
+        {
+            PathFollowerUtility.FollowPath ( playerObj.transform, nodes, playerSpeed );
+        }
     }
 }
