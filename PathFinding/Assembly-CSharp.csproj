@@ -52,12 +52,16 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\QPathFinder\Sample\Scripts\MouseClickDemo.cs" />
+     <Compile Include="Assets\QPathFinder\Sample\Scripts\MoveToPoint.cs" />
      <Compile Include="Assets\QPathFinder\Script\Followers\PathFollower.cs" />
      <Compile Include="Assets\QPathFinder\Script\Followers\PathFollowerSnapToGround.cs" />
      <Compile Include="Assets\QPathFinder\Script\Followers\PathFollowerUtility.cs" />
      <Compile Include="Assets\QPathFinder\Script\GraphData.cs" />
      <Compile Include="Assets\QPathFinder\Script\PathFinder.cs" />
      <Compile Include="Assets\QPathFinder\Script\Utils.cs" />
+ <Reference Include="Unity.ProBuilder.AddOns.Editor">
+ <HintPath>/Users/vijay.veluri/Git/PathFinding-WayPoint/PathFinding/Library/ScriptAssemblies/Unity.ProBuilder.AddOns.Editor.dll</HintPath>
+ </Reference>
  <Reference Include="UnityEditor.StandardEvents">
  <HintPath>/Users/vijay.veluri/Git/PathFinding-WayPoint/PathFinding/Library/ScriptAssemblies/UnityEditor.StandardEvents.dll</HintPath>
  </Reference>
@@ -261,6 +265,21 @@
  </Reference>
  <Reference Include="UnityEngine.Analytics">
  <HintPath>/Users/vijay.veluri/Library/Unity/cache/packages/packages.unity.com/com.unity.analytics@2.0.16/UnityEngine.Analytics.dll</HintPath>
+ </Reference>
+ <Reference Include="ProBuilderCore">
+ <HintPath>/Users/vijay.veluri/Library/Unity/cache/packages/packages.unity.com/com.unity.probuilder@3.0.9/ProBuilder/Classes/ProBuilderCore.dll</HintPath>
+ </Reference>
+ <Reference Include="ProBuilderMeshOps">
+ <HintPath>/Users/vijay.veluri/Library/Unity/cache/packages/packages.unity.com/com.unity.probuilder@3.0.9/ProBuilder/Classes/ProBuilderMeshOps.dll</HintPath>
+ </Reference>
+ <Reference Include="KdTreeLib">
+ <HintPath>/Users/vijay.veluri/Library/Unity/cache/packages/packages.unity.com/com.unity.probuilder@3.0.9/ProBuilder/Classes/ClassesLib/KdTreeLib.dll</HintPath>
+ </Reference>
+ <Reference Include="pb_Stl">
+ <HintPath>/Users/vijay.veluri/Library/Unity/cache/packages/packages.unity.com/com.unity.probuilder@3.0.9/ProBuilder/Classes/ClassesLib/pb_Stl.dll</HintPath>
+ </Reference>
+ <Reference Include="Poly2Tri">
+ <HintPath>/Users/vijay.veluri/Library/Unity/cache/packages/packages.unity.com/com.unity.probuilder@3.0.9/ProBuilder/Classes/ClassesLib/Poly2Tri.dll</HintPath>
  </Reference>
  <Reference Include="UnityEngine.Purchasing">
  <HintPath>/Users/vijay.veluri/Library/Unity/cache/packages/packages.unity.com/com.unity.purchasing@2.0.1/UnityEngine.Purchasing.dll</HintPath>

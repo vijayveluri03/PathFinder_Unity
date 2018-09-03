@@ -1,22 +1,52 @@
 ﻿<Properties StartupItem="Assembly-CSharp.csproj">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/WaypointPro/Sample/Script/Mr1Utility.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/QPathFinder/Script/PathFinder.cs">
     <Files>
-      <File FileName="Assets/WaypointPro/Sample/Script/PathFollowerYSnap.cs" Line="1" Column="1" />
-      <File FileName="Assets/WaypointPro/Sample/Script/PathFollower.cs" Line="1" Column="1" />
-      <File FileName="Assets/WaypointPro/Sample/Script/MouseClickDemo.cs" Line="1" Column="1" />
-      <File FileName="Assets/WaypointPro/Script/WaypointManager.cs" Line="1" Column="1" />
-      <File FileName="Assets/WaypointPro/Script/Editor/WaypointManagerEditor.cs" Line="1" Column="1" />
-      <File FileName="Assets/WaypointPro/Sample/Script/Mr1Utility.cs" Line="1" Column="1" />
+      <File FileName="Assets/QPathFinder/Sample/Scripts/MouseClickDemo.cs" Line="1" Column="1" />
+      <File FileName="Assets/QPathFinder/Script/Followers/PathFollowerUtility.cs" Line="283" Column="35" />
+      <File FileName="Assets/QPathFinder/Script/PathFinder.cs" Line="303" Column="3" />
+      <File FileName="Assets/QPathFinder/Script/GraphData.cs" Line="30" Column="87" />
+      <File FileName="Assets/QPathFinder/Script/Followers/PathFollowerSnapToGround.cs" Line="1" Column="1" />
+      <File FileName="Assets/QPathFinder/Script/Utils.cs" Line="13" Column="32" />
     </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="PathFinding" expanded="True">
+            <Node name="Assembly-CSharp" expanded="True">
+              <Node name="Assets" expanded="True">
+                <Node name="QPathFinder" expanded="True">
+                  <Node name="Script" expanded="True">
+                    <Node name="Followers" expanded="True" />
+                    <Node name="PathFinder.cs" selected="True" />
+                  </Node>
+                </Node>
+              </Node>
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+      <Pad Id="MonoDevelop.Debugger.WatchPad">
+        <State />
+      </Pad>
+      <Pad Id="MonoDevelop.NUnit.TestPad">
+        <State name="__root__">
+          <Node name="PathFinding" expanded="True" selected="True" />
+        </State>
+      </Pad>
+    </Pads>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore>
-      <Breakpoint file="/Users/vijay.veluri/Git/PathFinding-WayPoint/PathFinding/Assets/WaypointPro/Sample/Script/PathFollower.cs" line="109" column="1" />
-      <Breakpoint file="/Users/vijay.veluri/Git/PathFinding-WayPoint/PathFinding/Assets/WaypointPro/Sample/Script/PathFollower.cs" line="61" column="1" />
-      <Breakpoint file="/Users/vijay.veluri/Git/PathFinding-WayPoint/PathFinding/Assets/WaypointPro/Script/WaypointManager.cs" line="22" column="1" />
-      <Breakpoint file="/Users/vijay.veluri/Git/PathFinding-WayPoint/PathFinding/Assets/WaypointPro/Script/Editor/WaypointManagerEditor.cs" line="63" column="85" />
-      <Breakpoint file="/Users/vijay.veluri/Git/PathFinding-WayPoint/PathFinding/Assets/WaypointPro/Sample/Script/Mr1Utility.cs" line="271" column="1" />
+      <Breakpoint file="/Users/vijay.veluri/Git/PathFinding-WayPoint/PathFinding/Assets/QPathFinder/Script/Followers/PathFollowerUtility.cs" line="157" column="1" />
+      <Breakpoint file="/Users/vijay.veluri/Git/PathFinding-WayPoint/PathFinding/Assets/QPathFinder/Script/Followers/PathFollowerUtility.cs" line="283" column="1" />
+      <Breakpoint file="/Users/vijay.veluri/Git/PathFinding-WayPoint/PathFinding/Assets/QPathFinder/Script/PathFinder.cs" line="116" column="1" />
+      <Breakpoint file="/Users/vijay.veluri/Git/PathFinding-WayPoint/PathFinding/Assets/QPathFinder/Script/PathFinder.cs" line="131" column="1" />
+      <Breakpoint file="/Users/vijay.veluri/Git/PathFinding-WayPoint/PathFinding/Assets/QPathFinder/Script/PathFinder.cs" line="164" column="1" />
+      <Breakpoint file="/Users/vijay.veluri/Git/PathFinding-WayPoint/PathFinding/Assets/QPathFinder/Script/PathFinder.cs" line="175" column="1" />
+      <Breakpoint file="/Users/vijay.veluri/Git/PathFinding-WayPoint/PathFinding/Assets/QPathFinder/Script/PathFinder.cs" line="179" column="1" />
+      <Breakpoint file="/Users/vijay.veluri/Git/PathFinding-WayPoint/PathFinding/Assets/QPathFinder/Script/PathFinder.cs" line="188" column="1" />
+      <Breakpoint file="/Users/vijay.veluri/Git/PathFinding-WayPoint/PathFinding/Assets/QPathFinder/Script/PathFinder.cs" line="195" column="1" />
     </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
