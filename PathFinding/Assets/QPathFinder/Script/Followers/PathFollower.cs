@@ -54,16 +54,16 @@ namespace QPathFinder
             if ( QPathFinder.Logger.CanLogInfo ) QPathFinder.Logger.LogInfo ("PathFollower completed!");
         }
 
-        void MoveTo(int pointIndex)
+        public virtual void MoveTo(int pointIndex)
         {
-            var targetPos = ConvertPointIfNeeded( pointsToFollow[pointIndex] ) ;
+            var targetPos = pointsToFollow[pointIndex] ;
 
                 var deltaPos = targetPos - _transform.position;
                 //deltaPos.z = 0f;
                 _transform.up = Vector3.up;
                 _transform.forward = deltaPos.normalized;
 
-            _transform.position = Vector3.MoveTowards(_transform.position, targetPos, moveSpeed * Time.smoothDeltaTime);
+			_transform.position =	Vector3.MoveTowards(_transform.position, targetPos, moveSpeed * Time.smoothDeltaTime);
         }
 
         protected virtual bool IsOnPoint(int pointIndex) { return (_transform.position - pointsToFollow[pointIndex]).sqrMagnitude < 0.1f; }

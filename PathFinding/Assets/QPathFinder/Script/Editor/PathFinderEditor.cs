@@ -87,7 +87,7 @@ namespace QPathFinder
             script.graphData.lineColor = EditorGUILayout.ColorField("Path Color", script.graphData.lineColor);
             script.graphData.lineType = (PathLineType)EditorGUILayout.EnumPopup("Path Type", script.graphData.lineType);
             script.graphData.heightFromTheGround = EditorGUILayout.FloatField("Offset from ground( Height )", script.graphData.heightFromTheGround );
-            script.graphData.colliderLayer = EditorGUILayout.TextField("Ground collider layer name", script.graphData.colliderLayer );
+            script.graphData.groundColliderLayerName = EditorGUILayout.TextField("Ground collider layer name", script.graphData.groundColliderLayerName );
             EditorGUILayout.Space();
             GUILayout.Label ( "<size=12><b>Nodes</b></size>", CustomGUI.GetStyleWithRichText());
 
@@ -344,22 +344,22 @@ namespace QPathFinder
         {
             if( sceneMode == SceneMode.AddNode ) 
             {
-                LayerMask backgroundLayerMask = 1 << LayerMask.NameToLayer ( script.graphData.colliderLayer );
+                LayerMask backgroundLayerMask = 1 << LayerMask.NameToLayer ( script.graphData.groundColliderLayerName );
                 Ray ray = HandleUtility.GUIPointToWorldRay(mousePos);
                 RaycastHit hit;
 
-                if (Physics.Raycast(ray, out hit, 1000f, backgroundLayerMask))
+                if (Physics.Raycast(ray, out hit, 100000f, backgroundLayerMask))
                 {
                     Vector3 hitPos = hit.point;
                     hitPos += ( -ray.direction.normalized ) * script.graphData.heightFromTheGround;
                     AddNode(hitPos);
                 }
                 else 
-                    QPathFinder.Logger.LogError("No collider detected with layer " + script.graphData.colliderLayer + "! Could not add node! ");
+                    QPathFinder.Logger.LogError("No collider detected with layer " + script.graphData.groundColliderLayerName + "! Could not add node! ");
             }
             else if ( sceneMode == SceneMode.ConnectPath )
             {
-                LayerMask backgroundLayerMask = 1 << LayerMask.NameToLayer ( script.graphData.colliderLayer );
+                LayerMask backgroundLayerMask = 1 << LayerMask.NameToLayer ( script.graphData.groundColliderLayerName );
                 Ray ray = HandleUtility.GUIPointToWorldRay(mousePos);
                 RaycastHit hit;
 
@@ -369,7 +369,7 @@ namespace QPathFinder
                     TryAddPath ( hitPos );
                 }
                 else 
-                    QPathFinder.Logger.LogError("No collider detected with layer " + script.graphData.colliderLayer + "! Could not add node! ");
+                    QPathFinder.Logger.LogError("No collider detected with layer " + script.graphData.groundColliderLayerName + "! Could not add node! ");
             }
         }
 

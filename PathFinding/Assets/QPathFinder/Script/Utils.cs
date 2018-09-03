@@ -61,6 +61,13 @@ namespace QPathFinder
             }
         }
 
+		public static void SetDebugDrawLineDuration ( float duration )
+		{
+			DrawLineDuration = duration;
+		}
+
+		public static float DrawLineDuration { get; private set; }
+
 		private static bool IsRunningInEditorMode { get { return !Application.isPlaying; }}
         private static QPathFinder.Logger.Level m_logLevel = Level.Warnings ;
         

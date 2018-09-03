@@ -30,13 +30,46 @@ namespace QPathFinder
             if (Physics.Raycast ( point + offsetDistanceFromPoint * (-directionOfRayCast), directionOfRayCast,out hitInfo, maxDistanceForRayCast, backgroundLayerMask.value ) )
             {
                 Vector3 hitPos = hitInfo.point;
-                return hitPos + offsetDistanceToFloatFromGround * (-directionOfRayCast);
+				hitPos = hitPos + offsetDistanceToFloatFromGround * (-directionOfRayCast);
+				return hitPos;
             }
 
-            if ( QPathFinder.Logger.CanLogError ) QPathFinder.Logger.LogError("Ground not found at " + point + ". Could not snap to ground properly!");
+            if ( QPathFinder.Logger.CanLogError )
+            {
+
+                QPathFinder.Logger.LogError("Ground not found at " + point + ". Could not snap to ground properly! Raycast origin: " + (point + offsetDistanceFromPoint * (-directionOfRayCast)) +
+                        " raycast direction:" + directionOfRayCast + " Distance of raycase:" + maxDistanceForRayCast);
+
+
+                Debug.DrawLine ( point + offsetDistanceFromPoint * (-directionOfRayCast), point + offsetDistanceFromPoint * (-directionOfRayCast) + directionOfRayCast * maxDistanceForRayCast, Color.red, QPathFinder.Logger.DrawLineDuration );
+            }
             return point;
             
         }
+		public override void MoveTo(int pointIndex)
+		{
+			var targetPos = pointsToFollow[pointIndex] ;
+
+			var deltaPos = targetPos - _transform.position;
+			//deltaPos.z = 0f;
+			_transform.up = Vector3.up;
+			_transform.forward = deltaPos.normalized;
+
+			if ( directionOfRayCast.x != 0 )
+				targetPos.x = transform.position.x;
+			else if ( directionOfRayCast.y != 0 )
+				targetPos.y = transform.position.y;
+			else if ( directionOfRayCast.z != 0 )
+				targetPos.z = transform.position.z;
+
+			var newTransformPos =	Vector3.MoveTowards(_transform.position, targetPos, moveSpeed * Time.smoothDeltaTime);
+			newTransformPos = ConvertPointIfNeeded ( newTransformPos );;
+
+			if ( QPathFinder.Logger.CanLogInfo ) Debug.DrawLine( transform.position, newTransformPos, Color.blue, QPathFinder.Logger.DrawLineDuration );
+
+			_transform.position = newTransformPos;
+		}
+
 
 		protected override bool IsOnPoint(int pointIndex) 
 		{ 

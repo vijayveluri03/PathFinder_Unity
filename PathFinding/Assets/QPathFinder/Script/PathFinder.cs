@@ -116,7 +116,7 @@ namespace QPathFinder
                 foreach ( var point in nextPoints )
                 {
                     if ( point.heuristicDistance <= 0 )
-                        point.heuristicDistance = Vector3.Distance ( point.Position, endPoint.Position );
+						point.heuristicDistance = Vector3.Distance ( point.Position, endPoint.Position ) + Vector3.Distance( point.Position, startPoint.Position );
 
                     if ( minCost > point.combinedHeuristic )
                     {
@@ -169,7 +169,7 @@ namespace QPathFinder
                                                 graphData.nodesSorted[path.IDOfB] : graphData.nodesSorted[path.IDOfA];
 
                         if ( otherPoint.heuristicDistance <= 0 )
-                            otherPoint.heuristicDistance = Vector3.Distance ( otherPoint.Position, endPoint.Position );
+							otherPoint.heuristicDistance = Vector3.Distance ( otherPoint.Position, endPoint.Position ) + Vector3.Distance( otherPoint.Position, startPoint.Position );
 
                         if ( completedPoints.Contains ( otherPoint) )
                             continue;
@@ -244,7 +244,7 @@ namespace QPathFinder
                 foreach ( var point in nextPoints )
                 {
                     if ( point.heuristicDistance <= 0 )
-                        point.heuristicDistance = Vector3.Distance ( point.Position, endPoint.Position );
+						point.heuristicDistance = Vector3.Distance ( point.Position, endPoint.Position ) + Vector3.Distance( point.Position, startPoint.Position );
 
                     if ( minCost > point.combinedHeuristic )
                     {
@@ -298,7 +298,7 @@ namespace QPathFinder
                                                 graphData.nodesSorted[path.IDOfB] : graphData.nodesSorted[path.IDOfA];
 
                         if ( otherPoint.heuristicDistance <= 0 )
-                            otherPoint.heuristicDistance = Vector3.Distance ( otherPoint.Position, endPoint.Position );
+							otherPoint.heuristicDistance = Vector3.Distance ( otherPoint.Position, endPoint.Position ) + Vector3.Distance( otherPoint.Position, startPoint.Position );
 
                         if ( completedPoints.Contains ( otherPoint) )
                             continue;
