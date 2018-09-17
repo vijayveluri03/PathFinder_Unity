@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27130.2036
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PathFinderDLL", "PathFinderDLL\PathFinderDLL.csproj", "{6B2D448B-D4F7-466B-822F-C3E15D6B7C83}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PathFinderDLL", "RunTimeScriptsDLL\RunTimeScriptsDLL.csproj", "{6B2D448B-D4F7-466B-822F-C3E15D6B7C83}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EditorScripts", "EditorScripts\EditorScripts.csproj", "{FB044F9B-870C-4BE7-9DBE-0BFC4E228D0E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EditorScripts", "EditorScriptsDLL\EditorScriptsDLL.csproj", "{FB044F9B-870C-4BE7-9DBE-0BFC4E228D0E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
