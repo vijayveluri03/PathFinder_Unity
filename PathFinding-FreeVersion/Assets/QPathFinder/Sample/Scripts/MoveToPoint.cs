@@ -4,20 +4,19 @@ using UnityEngine;
 
 namespace QPathFinder
 {
-    public class MouseClickDemo : MonoBehaviour
+    public class MoveToPoint : MonoBehaviour
     {
-        public Camera camera;   // Needed for mouse click to world position convertion. 
+        public GameObject playerObj;
+        public GameObject[] gameobjects;   // Needed for mouse click to world position convertion. 
+
         public float playerSpeed = 20.0f;
-                public GameObject playerObj;
-
-
-        // For PathFollowerWithGroundSnap - This will snap the player to the ground while it follows the path. 
         public float playerFloatOffset;     // This is how high the player floats above the ground. 
         public float raycastOriginOffset;   // This is how high above the player u want to raycast to ground. 
         public int raycastDistanceFromOrigin = 40;   // This is how high above the player u want to raycast to ground. 
         public bool thoroughPathFinding = false;    // uses few extra steps in pathfinding to find accurate result. 
 
         public bool useGroundSnap = false;          // if snap to ground is not used, player goes only through nodes and doesnt project itself on the ground. 
+
 
         public QPathFinder.Logger.Level debugLogLevel;
         public float debugDrawLineDuration;
@@ -27,39 +26,35 @@ namespace QPathFinder
         {
             QPathFinder.Logger.SetLoggingLevel( debugLogLevel );
             QPathFinder.Logger.SetDebugDrawLineDuration ( debugDrawLineDuration );
-
         }
         void Update () 
         {
-            if ( Input.GetMouseButtonUp(0)) 
-            {
-                MovePlayerToMousePosition();
-            }
+            
 
         }
 
-        void MovePlayerToMousePosition()
+        void OnGUI()
         {
-			//Debug.LogError(PathFinder.instance.graphData.groundColliderLayerName + " " + LayerMask.NameToLayer( PathFinder.instance.graphData.groundColliderLayerName ));
-            LayerMask backgroundLayerMask = 1 << LayerMask.NameToLayer( PathFinder.instance.graphData.groundColliderLayerName );
-
-            Ray ray = camera.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
-            Vector3 hitPos = Vector3.zero;
-            if (Physics.Raycast(ray, out hit, 10000f, backgroundLayerMask))
+            if ( gameobjects != null )
             {
-                hitPos = hit.point;
+                int y = 0;
+                foreach ( var go in gameobjects )
+                {
+                    if ( GUI.Button ( new Rect ( Screen.width - 150, y*30, 150, 30), go.name ))
+                    {
+                        MoveTo( go.transform.position );
+                    }
+                    y++;
+                }
             }
-            else 
-            {
-                Debug.LogError("ERROR!");
-                return;
-            }
+        }
 
+        void MoveTo( Vector3 position )
+        {
             {
-                PathFinder.instance.FindShortestPathOfPoints( playerObj.transform.position, hitPos,  PathFinder.instance.graphData.lineType, 
+                PathFinder.instance.FindShortestPathOfPoints( playerObj.transform.position, position,  PathFinder.instance.graphData.lineType, 
                     Execution.Asynchronously,
-                    thoroughPathFinding ? SearchMode.Complex: SearchMode.Simple,
+                    SearchMode.Simple,
                     delegate ( List<Vector3> points ) 
                     { 
                         PathFollowerUtility.StopFollowing( playerObj.transform );
