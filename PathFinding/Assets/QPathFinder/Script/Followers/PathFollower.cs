@@ -15,8 +15,8 @@ namespace QPathFinder
         public Transform _transform { get; set; }
         
 		protected int _currentIndex;
-        
-        public void Follow(List<Vector3> pointsToFollow, float moveSpeed, bool autoRotate )
+
+        public void Follow(List<Vector3> pointsToFollow, float moveSpeed, bool autoRotate)
         {
             this.pointsToFollow = pointsToFollow;
             this.moveSpeed = moveSpeed;
