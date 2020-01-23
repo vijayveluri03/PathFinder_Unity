@@ -10,16 +10,17 @@ namespace QPathFinder
 		protected List<Vector3> pointsToFollow;
 
         public float moveSpeed = 10f;
-        public float rotateSpeed = 10f;
+        public bool alignToPath = true;
 
         public Transform _transform { get; set; }
         
 		protected int _currentIndex;
         
-        public void Follow(List<Vector3> pointsToFollow, float moveSpeed)
+        public void Follow(List<Vector3> pointsToFollow, float moveSpeed, bool autoRotate )
         {
             this.pointsToFollow = pointsToFollow;
             this.moveSpeed = moveSpeed;
+            this.alignToPath = autoRotate;
 
             StopFollowing();
 
@@ -60,8 +61,11 @@ namespace QPathFinder
 
                 var deltaPos = targetPos - _transform.position;
                 //deltaPos.z = 0f;
-                _transform.up = Vector3.up;
-                _transform.forward = deltaPos.normalized;
+                if ( alignToPath )
+                {
+                    _transform.up = Vector3.up;
+                    _transform.forward = deltaPos.normalized;
+                }
 
 			_transform.position =	Vector3.MoveTowards(_transform.position, targetPos, moveSpeed * Time.smoothDeltaTime);
         }

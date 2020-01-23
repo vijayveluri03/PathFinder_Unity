@@ -13,18 +13,15 @@ namespace QPathFinder
 	
 	public static class PathFinderExtensions
 	{
-		/// <Summary> 
-        /// Finds shortest path between Nodes.
-        /// Once the path if found, it will return the path as List of Positions ( not Nodes, If you need Nodes, use FindShortestPathOfNodes ). 
-        /// </Summary>
-        /// <returns> Returns list of **Positions**</returns>
-        /// <param name="startNodeID">Find the path from this node</param>
-        /// <param name="endNodeID">Find the path to this node</param>
+		/// Finds shortest path between Nodes.
+		/// Once the path is found, it will return the path as List of Positions (not Nodes, but vector3. If you need Nodes, use FindShortestPathOfNodes). 
+		/// <returns> Returns list of **Positions**</returns>
+		/// <param name="startNodeID">Find the path from this node</param>
+		/// <param name="endNodeID">Find the path to this node</param>
 		/// <param name="pathType">Path type. It can be a straight line or curved path</param>
-        /// <param name="executionType">Synchronous is immediate. This method locks the control till path is found and returns the path. 
-        /// Asynchronous type runs in coroutines with out locking the control. If you have more than 50 Nodes, Asynchronous is recommended</param>
-        /// <param name="OnPathFound">Callback once the path is found</param>
-
+		/// <param name="executionType">Synchronous is immediate and locks the control till path is found and returns the path. 
+		/// Asynchronous type runs in coroutines without locking the control. If you have more than 50 Nodes, Asynchronous is recommended</param>
+		/// <param name="OnPathFound">Callback once the path is found</param>
 
 		public static void FindShortestPathOfPoints (  this PathFinder manager, int startNodeID, int endNodeID, PathLineType pathType, Execution executionType, System.Action<List<Vector3>> OnPathFound )
 		{
@@ -32,18 +29,16 @@ namespace QPathFinder
 		}
 
 		
-		/// <Summary> 
-        /// Finds shortest path between Nodes.
-        /// Once the path if found, it will return the path as List of Positions ( not Nodes, If you need Nodes, use FindShortestPathOfNodes ). 
-        /// </Summary>
-        /// <returns> Returns list of **Positions**</returns>
-        /// <param name="startNodeID">Find the path from this node</param>
-        /// <param name="endNodeID">Find the path to this node</param>
+		/// Finds shortest path between Nodes.
+		/// Once the path is found, it will return the path as List of Positions ( not Nodes, but vector3. If you need Nodes, use FindShortestPathOfNodes). 
+		/// <returns> Returns list of **Positions**</returns>
+		/// <param name="startNodeID">Find the path from this node</param>
+		/// <param name="endNodeID">Find the path to this node</param>
 		/// <param name="pathType">Path type. It can be a straight line or curved path</param>
-        /// <param name="executionType">Synchronous is immediate. This method locks the control till path is found and returns the path. 
-        /// Asynchronous type runs in coroutines with out locking the control. If you have more than 50 Nodes, Asynchronous is recommended</param>
-		/// <param name="searchMode"> This is still WIP. For now, Intermediate and Complex does a tad bit more calculations to make the path shorter</param>
-        /// <param name="OnPathFound">Callback once the path is found</param>
+		/// <param name="executionType">Synchronous is immediate and locks the control till path is found and returns the path. 
+		/// Asynchronous type runs in coroutines with out locking the control. If you have more than 50 Nodes, Asynchronous is recommended</param>
+		/// <param name="searchMode"> This is still WIP. For now, Intermediate and Complex does a tad bit more calculations to make the path even shorter</param>
+		/// <param name="OnPathFound">Callback once the path is found</param>
 
 
 		public static void FindShortestPathOfPoints ( this PathFinder manager, Vector3 startPoint, Vector3 endPoint, PathLineType pathType, Execution executionType, SearchMode searchMode,  System.Action<List<Vector3>> OnPathFound )
@@ -60,13 +55,14 @@ namespace QPathFinder
 		/// <param name="transform">The object you want to move along the path</param>
 		/// <param name="points">List of positions along which the object is moved.</param>
 		/// <param name="moveSpeed">Movement speed</param>
+		/// <param name="autoRotateToDestination">'true' if you want transform to rotate in the direction of the movement</param>
 
-		public static PathFollower FollowPath( Transform transform, List<Vector3> points, float moveSpeed )
+		public static PathFollower FollowPath( Transform transform, List<Vector3> points, float moveSpeed, bool autoRotateToDestination )
 		{
 			if ( QPathFinder.Logger.CanLogInfo ) QPathFinder.Logger.LogInfo("Initiated Follow path for transform " + transform.name, true );
 			var pathFollower = CreateOrGet(transform);
 			if (points != null) 
-				pathFollower.Follow(points, moveSpeed);
+				pathFollower.Follow(points, moveSpeed, autoRotateToDestination);
 			else
 			{ 
 				if ( QPathFinder.Logger.CanLogError ) QPathFinder.Logger.LogError("Could not find the path for path follower to follow!", true );
@@ -82,13 +78,16 @@ namespace QPathFinder
 		/// <param name="transform">The object you want to move along the path</param>
 		/// <param name="points">List of positions along which the object is moved.</param>
 		/// <param name="moveSpeed">Movement speed</param>
+		/// <param name="autoRotateToDestination">'true' if you want transform to rotate in the direction of the movement</param>
 		/// <param name="directionOfRayCast"> We use raycasting to find the ground position. If your ground is down, the ray has to go down, so use Vector3.down. </param>
 		/// <param name="offsetDistanceToFloatFromGround"> If you want your character to float a little above the ground, give the offset value here </param>
 		/// <param name="groundGameObjectLayer">This is the ground Gameobject's layer. When we use raycast we target to hit this layer</param>
 		/// <param name="offsetDistanceFromPoint">this is to calculate the raycast origin, from where we shoot rays. raycast origin is generally above the player, casting rays towards ground. For most cases, you can leave this as default.</param>
 		/// <param name="maxDistanceForRayCast">this is the distance of ray from the raycast origin. For most cases you can let this be default value. </param>
 
-		public static PathFollower FollowPathWithGroundSnap( Transform transform, List<Vector3> points, float moveSpeed
+		public static PathFollower FollowPathWithGroundSnap( Transform transform, List<Vector3> points
+																, float moveSpeed
+																, bool autoRotateToDestination
 																, Vector3 directionOfRayCast			
 																, float offsetDistanceToFloatFromGround 
 																, int groundGameObjectLayer				
@@ -99,7 +98,7 @@ namespace QPathFinder
 			if ( QPathFinder.Logger.CanLogInfo ) QPathFinder.Logger.LogInfo("Initiated Follow path[With ground snap] for transform " + transform.name , true );
 			var pathFollower = CreateWithSnapToGround(transform, directionOfRayCast, offsetDistanceFromPoint, offsetDistanceToFloatFromGround, maxDistanceForRayCast, groundGameObjectLayer );
 			if (points != null) 
-				pathFollower.Follow(points, moveSpeed);
+				pathFollower.Follow(points, moveSpeed, true);
 			else 
 			{
 				if ( QPathFinder.Logger.CanLogError ) QPathFinder.Logger.LogError("Could not find the path for path follower to follow!", true );

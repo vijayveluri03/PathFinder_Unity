@@ -34,17 +34,16 @@ namespace QPathFinder
         }
 
 
-        /// <Summary> 
         /// Finds shortest path between Nodes.
-        /// Once the path if found, it will return the path as List of nodes ( not positions, If you need positions, use FindShortestPathOfPoints ). 
-        /// </Summary>
+        /// Once the path if found, it will return the path as List of nodes (not positions, but nodes. If you need positions, use FindShortestPathOfPoints). 
         /// <returns> Returns list of **Nodes**</returns>
         /// <param name="fromNodeID">Find the path from this node</param>
         /// <param name="toNodeID">Find the path to this node</param>
-        /// <param name="executionType">Synchronous is immediate. This method locks the control till path is found and returns the path. 
-        /// Asynchronous type runs in coroutines with out locking the control. If you have more than 50 Nodes, Asynchronous is recommended</param>
+        /// <param name="executionType">Synchronous is immediate and locks the control till path is found and returns the path. 
+        /// Asynchronous type runs in coroutines without locking the control. If you have more than 50 Nodes, Asynchronous is recommended</param>
         /// <param name="callback">Callback once the path is found</param>
-        
+
+
         public void FindShortestPathOfNodes ( int fromNodeID, int toNodeID, Execution executionType, System.Action<List<Node>> callback )
         {
             if ( executionType == Execution.Asynchronously )

@@ -10,6 +10,7 @@ namespace QPathFinder
         public GameObject[] gameobjects;   // Needed for mouse click to world position convertion. 
 
         public float playerSpeed = 20.0f;
+        public bool autoRotateTowardsDestination = true;
         public float playerFloatOffset;     // This is how high the player floats above the ground. 
         public float raycastOriginOffset;   // This is how high above the player u want to raycast to ground. 
         public int raycastDistanceFromOrigin = 40;   // This is how high above the player u want to raycast to ground. 
@@ -73,13 +74,16 @@ namespace QPathFinder
         void FollowThePathWithGroundSnap ( List<Vector3> nodes )
         {
             PathFollowerUtility.FollowPathWithGroundSnap ( playerObj.transform, 
-                                                        nodes, playerSpeed, Vector3.down, playerFloatOffset, LayerMask.NameToLayer( PathFinder.instance.graphData.groundColliderLayerName ),
+                                                        nodes, 
+                                                        playerSpeed, 
+                                                        autoRotateTowardsDestination,
+                                                        Vector3.down, playerFloatOffset, LayerMask.NameToLayer( PathFinder.instance.graphData.groundColliderLayerName ),
                                                         raycastOriginOffset, raycastDistanceFromOrigin );
         }
 
         void FollowThePathNormally ( List<Vector3> nodes )
         {
-            PathFollowerUtility.FollowPath ( playerObj.transform, nodes, playerSpeed );
+            PathFollowerUtility.FollowPath ( playerObj.transform, nodes, playerSpeed, autoRotateTowardsDestination );
         }
     }
 }
