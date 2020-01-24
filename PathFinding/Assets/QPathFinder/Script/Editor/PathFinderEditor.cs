@@ -32,7 +32,7 @@ namespace QPathFinder
                 var boxCollider = colliderGo.AddComponent<BoxCollider>();
                 boxCollider.isTrigger = true;
 
-                var manager = managerGo.AddComponent<PathFinder>();
+                managerGo.AddComponent<PathFinder>();
             }
             else
             {
@@ -56,7 +56,7 @@ namespace QPathFinder
                 var boxCollider = colliderGo.AddComponent<BoxCollider>();
                 boxCollider.isTrigger = true;
 
-                var manager = managerGo.AddComponent<PathFinder>();
+                managerGo.AddComponent<PathFinder>();
             }
             else
             {

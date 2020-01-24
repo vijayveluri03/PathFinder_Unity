@@ -6,7 +6,7 @@ namespace QPathFinder
 {
     public class MouseClickDemo : MonoBehaviour
     {
-        public Camera camera;   // Needed for mouse click to world position convertion. 
+        public Camera _camera;   // Needed for mouse click to world position convertion. 
         public float playerSpeed = 20.0f;
         public bool autoRotateTowardsDestination = true;
         public GameObject playerObj;
@@ -44,7 +44,7 @@ namespace QPathFinder
 			//Debug.LogError(PathFinder.instance.graphData.groundColliderLayerName + " " + LayerMask.NameToLayer( PathFinder.instance.graphData.groundColliderLayerName ));
             LayerMask backgroundLayerMask = 1 << LayerMask.NameToLayer( PathFinder.instance.graphData.groundColliderLayerName );
 
-            Ray ray = camera.ScreenPointToRay(Input.mousePosition);
+            Ray ray = _camera.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
             Vector3 hitPos = Vector3.zero;
             if (Physics.Raycast(ray, out hit, 10000f, backgroundLayerMask))

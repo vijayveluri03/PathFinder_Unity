@@ -8,7 +8,7 @@ namespace QPathFinder
 {
     public class CustomGUI : Editor
     {
-        static List<string> HeaderList = new List<string>();
+        //static List<string> HeaderList = new List<string>();
 
         public static void Space()
         {
