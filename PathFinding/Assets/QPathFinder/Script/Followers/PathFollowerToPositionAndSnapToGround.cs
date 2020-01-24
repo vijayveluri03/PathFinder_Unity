@@ -6,7 +6,7 @@ using UnityEngine;
 namespace QPathFinder
 {
     
-    public class PathFollowerSnapToGround : PathFollower
+    public class PathFollowerToPositionAndSnapToGround : PathFollower
     {
         Vector3 directionOfRayCast;
         float offsetDistanceFromPoint;
@@ -14,7 +14,7 @@ namespace QPathFinder
         LayerMask backgroundLayerMask;
         float offsetDistanceToFloatFromGround;
 
-        public void Init ( Vector3 directionOfRayCast, float offsetDistanceFromPoint, float offsetDistanceToFloatFromGround, int maxDistanceForRayCast, int groundLayer )
+        public void SetContext ( Vector3 directionOfRayCast, float offsetDistanceFromPoint, float offsetDistanceToFloatFromGround, int maxDistanceForRayCast, int groundLayer )
         {
             this.directionOfRayCast = directionOfRayCast.normalized;
             this.offsetDistanceFromPoint = offsetDistanceFromPoint;
@@ -24,7 +24,7 @@ namespace QPathFinder
             backgroundLayerMask = 1 << groundLayer;
         }
 
-        public override Vector3 ConvertPointIfNeeded ( Vector3 point )
+        public Vector3 AdjustPositionIfNeeded ( Vector3 point )
         {
             RaycastHit hitInfo;
             if (Physics.Raycast ( point + offsetDistanceFromPoint * (-directionOfRayCast), directionOfRayCast,out hitInfo, maxDistanceForRayCast, backgroundLayerMask.value ) )
@@ -48,7 +48,7 @@ namespace QPathFinder
         }
 		public override void MoveTo(int pointIndex)
 		{
-			var targetPos = pointsToFollow[pointIndex] ;
+			var targetPos = CastToVec( _pathToFollow[pointIndex] );
 
 			var deltaPos = targetPos - _transform.position;
 			//deltaPos.z = 0f;
@@ -63,7 +63,7 @@ namespace QPathFinder
 				targetPos.z = transform.position.z;
 
 			var newTransformPos =	Vector3.MoveTowards(_transform.position, targetPos, moveSpeed * Time.smoothDeltaTime);
-			newTransformPos = ConvertPointIfNeeded ( newTransformPos );;
+			newTransformPos = AdjustPositionIfNeeded ( newTransformPos );;
 
 			if ( QPathFinder.Logger.CanLogInfo ) Debug.DrawLine( transform.position, newTransformPos, Color.blue, QPathFinder.Logger.DrawLineDuration );
 
@@ -73,7 +73,7 @@ namespace QPathFinder
 
 		protected override bool IsOnPoint(int pointIndex) 
 		{ 
-			Vector3 finalPoint = ConvertPointIfNeeded(pointsToFollow[pointIndex]);
+			Vector3 finalPoint = AdjustPositionIfNeeded( CastToVec( _pathToFollow[pointIndex] ) );
 			float mag = (_transform.position - finalPoint).sqrMagnitude; 
 			return mag < 0.1f;
 		}

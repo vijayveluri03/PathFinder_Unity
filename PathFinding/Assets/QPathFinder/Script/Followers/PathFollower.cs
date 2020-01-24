@@ -2,34 +2,54 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 namespace QPathFinder
 {
     public class PathFollower : MonoBehaviour
     {
-		protected List<Vector3> pointsToFollow;
-
         public float moveSpeed = 10f;
         public bool alignToPath = true;
-
         public Transform _transform { get; set; }
-        
+		protected List<System.Object> _pathToFollow;
 		protected int _currentIndex;
 
-        public void Follow(List<Vector3> pointsToFollow, float moveSpeed, bool autoRotate)
+        protected Vector3 CastToVec ( System.Object ob ) { if ( ob is Vector3) return (Vector3) ob; Debug.Assert( false, "Invalid cast"); return Vector3.zero; }
+        protected Node CastToNode ( System.Object ob ) { if ( ob is Node) return (Node) ob; Debug.Assert( false, "Invalid cast"); return null; }
+        protected virtual bool IsOnPoint(int pointIndex) { Debug.LogError("Override this"); return false; /* override this */ }
+		protected bool IsEndPoint(int pointIndex) { return pointIndex == EndIndex(); }
+		protected int EndIndex() { return _pathToFollow.Count - 1; }
+		protected int GetNextIndex(int currentIndex) { int nextIndex = -1; if (currentIndex < EndIndex()) nextIndex = currentIndex + 1; return nextIndex; }
+        protected int StartIndex() { return 0; }
+
+		
+        public void Follow(List<System.Object> pointsToFollow, float moveSpeed, bool autoRotate)
         {
-            this.pointsToFollow = pointsToFollow;
+            this._pathToFollow = pointsToFollow;
             this.moveSpeed = moveSpeed;
             this.alignToPath = autoRotate;
 
             StopFollowing();
-
             _currentIndex = 0;
-
             StartCoroutine(FollowPath());
         }
 
-        public void StopFollowing() { StopAllCoroutines(); }
+        // follow vertices 
+		public void Follow(List<Vector3> pointsToFollow, float moveSpeed, bool autoRotate)
+        {
+            Follow ( pointsToFollow.Cast<System.Object>().ToList(), moveSpeed, autoRotate );
+        }
+
+        // follow Nodes 
+        public void Follow(List<Node> pointsToFollow, float moveSpeed, bool autoRotate)
+        {
+            Follow ( pointsToFollow.Cast<System.Object>().ToList(), moveSpeed, autoRotate );
+        }
+
+        public void StopFollowing() 
+        { 
+            StopAllCoroutines(); 
+        }
         
         IEnumerator FollowPath()
         {
@@ -38,7 +58,7 @@ namespace QPathFinder
 
             while (true)
             {
-                _currentIndex = Mathf.Clamp(_currentIndex, 0, pointsToFollow.Count - 1);
+                _currentIndex = Mathf.Clamp(_currentIndex, 0, _pathToFollow.Count - 1);
 
                 if (IsOnPoint(_currentIndex))
                 {
@@ -57,49 +77,8 @@ namespace QPathFinder
 
         public virtual void MoveTo(int pointIndex)
         {
-            var targetPos = pointsToFollow[pointIndex] ;
-
-                var deltaPos = targetPos - _transform.position;
-                //deltaPos.z = 0f;
-                if ( alignToPath )
-                {
-                    _transform.up = Vector3.up;
-                    _transform.forward = deltaPos.normalized;
-                }
-
-			_transform.position =	Vector3.MoveTowards(_transform.position, targetPos, moveSpeed * Time.smoothDeltaTime);
+            /// override this 
+            Debug.LogError("Override this");
         }
-
-        protected virtual bool IsOnPoint(int pointIndex) { return (_transform.position - pointsToFollow[pointIndex]).sqrMagnitude < 0.1f; }
-
-        bool IsEndPoint(int pointIndex)
-        {
-            return pointIndex == EndIndex();
-        }
-
-        int StartIndex()
-        {
-            return 0;
-        }
-
-        public virtual Vector3 ConvertPointIfNeeded ( Vector3 point )
-        {
-            return point;
-        }
-
-        int EndIndex()
-        {
-            return pointsToFollow.Count - 1;
-        }
-
-        int GetNextIndex(int currentIndex)
-        {
-            int nextIndex = -1;
-            if (currentIndex < EndIndex()) 
-				nextIndex = currentIndex + 1;
-      
-            return nextIndex;
-        }
-
     }
 }

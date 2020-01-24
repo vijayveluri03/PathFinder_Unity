@@ -60,9 +60,30 @@ namespace QPathFinder
 		public static PathFollower FollowPath( Transform transform, List<Vector3> points, float moveSpeed, bool autoRotateToDestination )
 		{
 			if ( QPathFinder.Logger.CanLogInfo ) QPathFinder.Logger.LogInfo("Initiated Follow path for transform " + transform.name, true );
-			var pathFollower = CreateOrGet(transform);
+			var pathFollower = CreateOrGetPathFollowerToPosition(transform);
 			if (points != null) 
 				pathFollower.Follow(points, moveSpeed, autoRotateToDestination);
+			else
+			{ 
+				if ( QPathFinder.Logger.CanLogError ) QPathFinder.Logger.LogError("Could not find the path for path follower to follow!", true );
+			}
+			return pathFollower;
+		}
+
+		/// <Summary>
+		///	This will move the game object through the NODES specified.
+		/// </Summary>
+		/// <param name="transform">The object you want to move along the path</param>
+		/// <param name="nodes">List of Nodes along which the object is moved.</param>
+		/// <param name="moveSpeed">Movement speed</param>
+		/// <param name="autoRotateToDestination">'true' if you want transform to rotate in the direction of the movement</param>
+
+		public static PathFollower FollowPath( Transform transform, List<Node> nodes, float moveSpeed, bool autoRotateToDestination )
+		{
+			if ( QPathFinder.Logger.CanLogInfo ) QPathFinder.Logger.LogInfo("Initiated Follow path for transform " + transform.name, true );
+			var pathFollower = CreateOrGetPathFollowerWithNodes(transform);
+			if (nodes != null) 
+				pathFollower.Follow(nodes, moveSpeed, autoRotateToDestination);
 			else
 			{ 
 				if ( QPathFinder.Logger.CanLogError ) QPathFinder.Logger.LogError("Could not find the path for path follower to follow!", true );
@@ -98,7 +119,7 @@ namespace QPathFinder
 			if ( QPathFinder.Logger.CanLogInfo ) QPathFinder.Logger.LogInfo("Initiated Follow path[With ground snap] for transform " + transform.name , true );
 			var pathFollower = CreateWithSnapToGround(transform, directionOfRayCast, offsetDistanceFromPoint, offsetDistanceToFloatFromGround, maxDistanceForRayCast, groundGameObjectLayer );
 			if (points != null) 
-				pathFollower.Follow(points, moveSpeed, true);
+				pathFollower.Follow(points, moveSpeed, autoRotateToDestination);
 			else 
 			{
 				if ( QPathFinder.Logger.CanLogError ) QPathFinder.Logger.LogError("Could not find the path for path follower to follow!", true );
@@ -359,13 +380,28 @@ namespace QPathFinder
             return path;
         }
 
-		private static PathFollower CreateOrGet(Transform transform)
+		private static PathFollower CreateOrGetPathFollowerToPosition(Transform transform)
 		{
-			var pathFollower = transform.GetComponent<PathFollower>();
+			var pathFollower = transform.GetComponent<PathFollowerToPosition>();
 			if (pathFollower == null) 
 			{
 				if ( QPathFinder.Logger.CanLogInfo ) QPathFinder.Logger.LogInfo ("PathFollower Script created and attached");
-				pathFollower = transform.gameObject.AddComponent<PathFollower>();
+				pathFollower = transform.gameObject.AddComponent<PathFollowerToPosition>();
+			}
+			else 
+			{
+				if ( QPathFinder.Logger.CanLogInfo ) QPathFinder.Logger.LogInfo ("Using existing PathFollower Script to follow the path!");
+			}
+			pathFollower._transform = transform;
+			return pathFollower;
+		}
+		private static PathFollower CreateOrGetPathFollowerWithNodes(Transform transform)
+		{
+			var pathFollower = transform.GetComponent<PathFollowerWithNodes>();
+			if (pathFollower == null) 
+			{
+				if ( QPathFinder.Logger.CanLogInfo ) QPathFinder.Logger.LogInfo ("PathFollower Script created and attached");
+				pathFollower = transform.gameObject.AddComponent<PathFollowerWithNodes>();
 			}
 			else 
 			{
@@ -376,18 +412,18 @@ namespace QPathFinder
 		}
 		private static PathFollower CreateWithSnapToGround(Transform transform, Vector3 directionOfRayCast, float offsetDistanceFromPoint, float offsetDistanceToFloatFromGround, int maxDistanceForRayCast, int groundLayer)
 		{
-			var pathFollower = transform.GetComponent<PathFollowerSnapToGround>();
+			var pathFollower = transform.GetComponent<PathFollowerToPositionAndSnapToGround>();
 			if (pathFollower == null)
 			{
 				if ( QPathFinder.Logger.CanLogInfo ) QPathFinder.Logger.LogInfo ("PathFollowerSnapToGround Script created and attached");
-				pathFollower = transform.gameObject.AddComponent<PathFollowerSnapToGround>();
+				pathFollower = transform.gameObject.AddComponent<PathFollowerToPositionAndSnapToGround>();
 			}
 			else 
 			{
 				if ( QPathFinder.Logger.CanLogInfo ) QPathFinder.Logger.LogInfo ("Using existing PathFollowerSnapToGround Script to follow the path!");
 			}
 
-			pathFollower.Init( directionOfRayCast, offsetDistanceFromPoint, offsetDistanceToFloatFromGround, maxDistanceForRayCast, groundLayer);
+			pathFollower.SetContext( directionOfRayCast, offsetDistanceFromPoint, offsetDistanceToFloatFromGround, maxDistanceForRayCast, groundLayer);
 
 			pathFollower._transform = transform;
 			return pathFollower;
