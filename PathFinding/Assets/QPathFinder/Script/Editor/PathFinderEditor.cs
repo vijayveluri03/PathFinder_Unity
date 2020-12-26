@@ -212,10 +212,10 @@ namespace QPathFinder
                                                             {
                                                                 EditorGUILayout.BeginVertical();
 
-                                                                if (GUILayout.Button("Delete Node"))
+                                                                if (GUILayout.Button("Delete Last Node"))
                                                                     DeleteNode();
 
-                                                                if (GUILayout.Button("Delete Path"))
+                                                                if (GUILayout.Button("Delete Last Path"))
                                                                     DeletePath();
 
                                                                 if (GUILayout.Button("Clear All"))
@@ -247,9 +247,9 @@ namespace QPathFinder
                     Handles.color = color;
 
                 if ( canMove ) 
-                    node.SetPosition ( Handles.FreeMoveHandle(node.Position, Quaternion.identity, script.graphData.nodeSize, Vector3.zero, Handles.SphereCap) );
+                    node.SetPosition ( Handles.FreeMoveHandle(node.Position, Quaternion.identity, script.graphData.nodeSize, Vector3.zero, Handles.SphereHandleCap) );
                 else
-                    Handles.SphereCap(0, node.Position, Quaternion.identity, script.graphData.nodeSize);
+                    Handles.SphereHandleCap(0, node.Position, Quaternion.identity, script.graphData.nodeSize, EventType.Repaint);
             }
             Handles.color = Color.white;
             DrawGUIDisplayForNodes();
@@ -505,7 +505,7 @@ namespace QPathFinder
             if ( Application.isPlaying )
                 return;
                 
-            if ( PrefabUtility.GetPrefabParent( script.gameObject ) != null ) 
+            if ( PrefabUtility.GetCorrespondingObjectFromSource( script.gameObject ) != null ) 
             {
                 //QPathFinder.Logger.LogInfo ( "Prefab for PathFinder found! Marked it Dirty ( Modified )");
                 EditorUtility.SetDirty(script);
