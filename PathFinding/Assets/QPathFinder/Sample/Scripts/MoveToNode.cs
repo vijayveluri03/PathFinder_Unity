@@ -54,7 +54,7 @@ namespace QPathFinder
             {
                 PathFinder.instance.FindShortestPathOfPoints( playerObj.transform.position, node.Position,  PathFinder.instance.graphData.lineType, 
                     Execution.Asynchronously,
-                    SearchMode.Simple,
+                    SearchMode.FindNearestNode,
                     delegate ( List<Vector3> points ) 
                     { 
                         PathFollowerUtility.StopFollowing( playerObj.transform );

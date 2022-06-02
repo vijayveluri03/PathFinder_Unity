@@ -16,7 +16,7 @@ namespace QPathFinder
         public float playerFloatOffset;     // This is how high the player floats above the ground. 
         public float raycastOriginOffset;   // This is how high above the player u want to raycast to ground. 
         public int raycastDistanceFromOrigin = 40;   // This is how high above the player u want to raycast to ground. 
-        public bool thoroughPathFinding = false;    // uses few extra steps in pathfinding to find accurate result. 
+        public bool goBeyondThePathsDefined = false;    // uses few extra steps in pathfinding to find accurate result. 
 
         public bool useGroundSnap = false;          // if snap to ground is not used, player goes only through nodes and doesnt project itself on the ground. 
 
@@ -60,7 +60,7 @@ namespace QPathFinder
             {
                 PathFinder.instance.FindShortestPathOfPoints( playerObj.transform.position, hitPos,  PathFinder.instance.graphData.lineType, 
                     Execution.Asynchronously,
-                    thoroughPathFinding ? SearchMode.Complex: SearchMode.Simple,
+                    goBeyondThePathsDefined ? SearchMode.FindPathBeyondTheNodesAndConnections: SearchMode.FindNearestPointOnTheConnection,
                     delegate ( List<Vector3> points ) 
                     { 
                         PathFollowerUtility.StopFollowing( playerObj.transform );
